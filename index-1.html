@@ -2900,16 +2900,9 @@ init();
 // ── PWA SERVICE WORKER ──────────────────────────────────────────
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    // Only register on GitHub Pages (not local/claude viewer)
-    const isGithubPages = location.hostname.endsWith('github.io') || 
-                          location.hostname.endsWith('github.com');
-    const swPath = isGithubPages ? '/G-nl-k-program/sw.js' : './sw.js';
-    // Only attempt if sw.js likely exists (GitHub Pages or explicit local)
-    if(isGithubPages || location.protocol === 'file:'){
-      navigator.serviceWorker.register(swPath)
-        .then(r=>console.log('✅ SW:',r.scope))
-        .catch(e=>console.warn('SW hata:',e.message));
-    }
+    navigator.serviceWorker.register('./sw.js')
+      .then(r=>console.log('✅ SW:',r.scope))
+      .catch(e=>{}); // suppress 404 errors silently
   });
 }
 </script>
