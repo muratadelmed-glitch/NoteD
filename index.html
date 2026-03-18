@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Program</title>
+<meta name="description" content="Kişisel günlük program ve gelişim takibi">
+<meta name="theme-color" content="#08090c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Program">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inconsolata:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── THEME VARS ── */
+:root{
+  --bg:#08090c;--s1:#0f1015;--s2:#14151d;--s3:#1c1d28;
+  --border:#252636;--border2:#32334a;
+  --accent:#e8c547;--blue:#5c9eff;--red:#ff6b6b;--green:#52d9a0;--purple:#b87bff;
+  --text:#edeae0;--muted:#5a5870;--muted2:#8a8799;--radius:12px;
+  --bg-image:none;
+}
+:root[data-theme="gray"]{--bg:#111316;--s1:#16181d;--s2:#1c1e24;--s3:#23262e;--border:#2e3040;--border2:#3a3d50;}
+:root[data-theme="black"]{--bg:#000;--s1:#080808;--s2:#0f0f0f;--s3:#161616;--border:#1e1e1e;--border2:#282828;}
+:root[data-theme="light"]{--bg:#f0f0f0;--s1:#e8e8e8;--s2:#f5f5f5;--s3:#ffffff;--border:#d0d0d0;--border2:#b8b8b8;--text:#1a1a1a;--muted:#888;--muted2:#666;}
+
+html,body{min-height:100%;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Inconsolata',monospace;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  line-height:1.5;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:var(--bg-image) center/cover no-repeat;
+  opacity:.18;pointer-events:none;
+}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.2rem;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:rgba(8,9,12,.97);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:200;
+  gap:.5rem;
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;color:var(--accent);letter-spacing:.04em;white-space:nowrap;flex-shrink:0}
+.nav-right{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.nav-tabs{display:flex;gap:.2rem;flex-wrap:wrap}
+.tab-btn{font-family:'Inconsolata',monospace;font-size:.73rem;padding:.3rem .6rem;border-radius:7px;border:1px solid transparent;background:none;color:var(--muted2);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.tab-btn.active{background:var(--s3);border-color:var(--border2);color:var(--text)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.nav-icon-btn{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:.3rem;border-radius:6px;transition:color .15s;flex-shrink:0}
+.nav-icon-btn:hover{color:var(--text)}
+
+/* online/offline */
+.conn-badge{
+  display:flex;align-items:center;gap:.3rem;font-size:.68rem;
+  padding:.18rem .5rem;border-radius:20px;flex-shrink:0;
+  font-family:'Inconsolata',monospace;
+}
+.conn-badge.online{background:rgba(82,217,160,.1);color:var(--green);border:1px solid rgba(82,217,160,.25)}
+.conn-badge.offline{background:rgba(255,107,107,.1);color:var(--red);border:1px solid rgba(255,107,107,.25)}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(8,9,12,.97);border-top:1px solid var(--border);backdrop-filter:blur(16px);z-index:200;padding:.35rem 0 env(safe-area-inset-bottom,.35rem)}
+.bottom-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:.15rem;background:none;border:none;cursor:pointer;padding:.3rem .4rem;border-radius:8px;color:var(--muted);transition:color .15s;min-width:48px}
+.bnav-btn .bi{font-size:1.1rem;line-height:1;transition:transform .15s}
+.bnav-btn .bl{font-size:.58rem;letter-spacing:.04em;text-transform:uppercase}
+.bnav-btn.active{color:var(--accent)}
+.bnav-btn.active .bi{transform:scale(1.15)}
+.bnav-btn:hover:not(.active){color:var(--muted2)}
+@media(max-width:620px){
+  .nav-tabs{display:none}
+  .bottom-nav{display:block}
+}
+
+/* ── PAGES ── */
+.page{display:none;padding:1.1rem 1rem calc(6.5rem + env(safe-area-inset-bottom,0px));max-width:860px;margin:0 auto;box-sizing:border-box}
+.page.active{display:block;animation:pgIn .22s ease both;min-height:calc(100vh - 60px)}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.sec-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--accent);margin-bottom:1.3rem;display:flex;align-items:center;gap:.6rem}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* ── CARDS ── */
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem}
+.mt{margin-top:.7rem}
+
+/* ── INPUTS ── */
+.field{display:flex;flex-direction:column;gap:.28rem}
+.field label{font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+input,select,textarea{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:.52rem .75rem;color:var(--text);font-family:'Inconsolata',monospace;font-size:.87rem;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--s1)}
+input[type="time"]{color-scheme:dark}
+textarea{min-height:80px;resize:vertical;line-height:1.55}
+input[type="range"]{padding:0;border:none;height:20px;cursor:pointer;accent-color:var(--accent)}
+input[type="checkbox"]{width:auto;cursor:pointer;accent-color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Inconsolata',monospace;font-size:.83rem;font-weight:600;padding:.5rem .95rem;border-radius:8px;border:none;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap;letter-spacing:.04em;display:inline-flex;align-items:center;gap:.35rem}
+.btn:active{transform:scale(.96)}
+.btn-accent{background:var(--accent);color:#1a1500}.btn-accent:hover{opacity:.82}
+.btn-ghost{background:var(--s3);color:var(--muted2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-blue{background:var(--blue);color:#001122}.btn-blue:hover{opacity:.82}
+.btn-red{background:var(--red);color:#1a0000}.btn-red:hover{opacity:.82}
+.btn-green{background:var(--green);color:#001a0d}.btn-green:hover{opacity:.82}
+.btn-purple{background:var(--purple);color:#0d001a}.btn-purple:hover{opacity:.82}
+.btn-sm{font-size:.75rem;padding:.32rem .65rem}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+@media(max-width:500px){.g2{grid-template-columns:1fr}}
+
+/* ── TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:.38rem}
+.tl-row{display:grid;grid-template-columns:50px 13px 1fr;gap:0 .65rem;align-items:start}
+.tl-time{font-size:.72rem;color:var(--muted2);text-align:right;padding-top:.82rem;font-variant-numeric:tabular-nums}
+.tl-spine{display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:11px;height:11px;border-radius:50%;background:var(--s2);border:2px solid var(--border2);margin-top:.8rem;flex-shrink:0;z-index:1;transition:border-color .18s,transform .18s;will-change:transform}
+.tl-row:hover .tl-dot{border-color:var(--accent);transform:scale(1.35)}
+.tl-seg{flex:1;width:1px;background:var(--border);margin:.25rem 0}
+.tl-card{background:var(--s2);border:1px solid var(--border);border-left:3px solid currentColor;border-radius:10px;padding:.6rem .85rem;display:flex;align-items:center;gap:.6rem;cursor:pointer;transition:transform .15s ease-out,box-shadow .15s;user-select:none;will-change:transform}
+.tl-card:hover{transform:translateX(4px);box-shadow:0 6px 28px rgba(0,0,0,.4)}
+.tl-info{flex:1;min-width:0}
+.tl-name{font-weight:600;font-size:.87rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.tl-sub{font-size:.71rem;color:var(--muted2);margin-top:.1rem}
+.tl-badge{font-size:.67rem;padding:.18rem .46rem;border-radius:20px;font-weight:600;flex-shrink:0;opacity:.9}
+.tl-del,.tl-edit{background:none;border:none;cursor:pointer;font-size:.87rem;padding:.18rem .25rem;border-radius:4px;transition:color .15s,background .15s;flex-shrink:0;color:var(--muted)}
+.tl-del:hover{color:var(--red);background:rgba(255,107,107,.1)}
+.tl-edit:hover{color:var(--blue);background:rgba(92,158,255,.1)}
+
+/* ── COLOR PICKER ── */
+.color-palette{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.4rem}
+.cp-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0}
+.cp-swatch:hover{transform:scale(1.15)}
+.cp-swatch.active{border-color:var(--text)}
+.cp-custom{width:28px;height:28px;padding:.1rem .15rem;cursor:pointer;border-radius:6px;border:2px solid var(--border2);background:var(--s1)}
+
+/* ── TIMER ── */
+.act-pick-list{display:flex;flex-direction:column;gap:.36rem;max-height:220px;overflow-y:auto}
+.act-pick{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-radius:8px;border:1px solid var(--border);background:var(--s1);cursor:pointer;transition:border-color .15s,background .15s}
+.act-pick:hover,.act-pick.sel{border-color:var(--accent);background:var(--s3)}
+.act-pick.sel .apc-check{color:var(--accent)}
+.apc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.apc-name{font-size:.84rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apc-dur{font-size:.71rem;color:var(--muted2);flex-shrink:0}
+.apc-check{color:transparent;font-size:.78rem;transition:color .15s;flex-shrink:0}
+
+.ring-wrap{width:148px;height:148px;margin:0 auto 1rem;position:relative}
+.ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.r-bg{fill:none;stroke:var(--border);stroke-width:7}
+.r-fill{fill:none;stroke:var(--green);stroke-width:7;stroke-linecap:round;stroke-dasharray:439.82;stroke-dashoffset:439.82;transition:stroke-dashoffset .4s ease-out,stroke .3s;will-change:stroke-dashoffset}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--green);transition:color .3s}
+.ring-lbl{font-size:.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+.mode-row{display:flex;justify-content:center;gap:.38rem;margin-bottom:1rem}
+.mode-pill{font-family:'Inconsolata',monospace;font-size:.72rem;padding:.25rem .72rem;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--muted2);cursor:pointer;transition:all .15s}
+.mode-pill.active{background:var(--accent);color:#1a1500;border-color:var(--accent)}
+.t-act-name{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem}
+.t-clock{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,11vw,5rem);font-weight:800;color:var(--accent);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;transition:color .3s;margin-bottom:1rem;will-change:color}
+.t-clock.running{color:var(--green)}.t-clock.paused{color:var(--blue)}.t-clock.done{color:var(--red)}
+.t-controls{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-top:.85rem}
+
+/* ── WEEKLY GOALS ── */
+.goal-item{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;margin-bottom:.38rem}
+.goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;font-size:.8rem}
+.goal-bar-track{height:5px;background:var(--border);border-radius:4px;overflow:hidden}
+.goal-bar-fill{height:100%;border-radius:4px;transition:width .5s ease-out}
+
+/* ── TASKS ── */
+.task-score-bar{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1.05rem;margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+.score-main{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--accent);line-height:1}
+.score-sub{font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-top:.18rem}
+.score-hist{display:flex;align-items:flex-end;gap:.3rem;height:46px;margin-top:.5rem}
+.sh-bar{flex:1;border-radius:3px 3px 0 0;min-height:2px;background:var(--accent);opacity:.55;transition:height .4s ease-out;position:relative}
+.sh-bar:hover{opacity:1}
+.sh-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:.1rem .35rem;font-size:.62rem;white-space:nowrap;color:var(--text);pointer-events:none}
+.task-list{display:flex;flex-direction:column;gap:.38rem}
+.task-item{display:flex;align-items:center;gap:.65rem;padding:.65rem .85rem;border-radius:10px;background:var(--s2);border:1px solid var(--border);transition:opacity .2s;user-select:none}
+.task-item.done{opacity:.48}
+.task-item.done .task-title{text-decoration:line-through;color:var(--muted2)}
+.task-cb{width:22px;height:22px;border-radius:6px;flex-shrink:0;border:2px solid var(--border2);background:var(--s1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .15s}
+.task-cb:hover{border-color:var(--accent)}
+.task-item.done .task-cb{background:var(--accent);border-color:var(--accent);color:#1a1500}
+.task-title{flex:1;font-size:.86rem;line-height:1.35}
+.task-diff-badge{font-size:.67rem;padding:.15rem .44rem;border-radius:20px;font-weight:600;flex-shrink:0}
+.task-remind{font-size:.68rem;color:var(--muted2);flex-shrink:0}
+.task-pts{font-size:.7rem;font-weight:700;flex-shrink:0}
+.task-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.84rem;padding:.15rem .22rem;border-radius:4px;transition:color .15s;flex-shrink:0}
+.task-del:hover{color:var(--red)}
+.task-recur-badge{font-size:.62rem;color:var(--blue);background:rgba(92,158,255,.1);padding:.1rem .35rem;border-radius:10px;flex-shrink:0}
+.tasks-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+
+/* ── ANALIZ (merged) ── */
+.analiz-tabs{display:flex;gap:.35rem;margin-bottom:1.1rem;border-bottom:1px solid var(--border);padding-bottom:.6rem;flex-wrap:wrap}
+.analiz-tab{font-family:'Inconsolata',monospace;font-size:.78rem;padding:.3rem .75rem;border-radius:7px;border:none;background:none;color:var(--muted2);cursor:pointer;transition:all .15s;font-weight:600}
+.analiz-tab.active{background:var(--s3);color:var(--text)}
+.analiz-tab:hover:not(.active){color:var(--text)}
+.analiz-section{display:none}.analiz-section.active{display:block}
+
+/* stats */
+.stats-top{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1rem}
+@media(max-width:480px){.stats-top{grid-template-columns:1fr 1fr}}
+.s-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:.88rem .8rem}
+.s-val{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;line-height:1}
+.s-lbl{font-size:.64rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-top:.25rem}
+.period-row{display:flex;gap:.3rem;margin-bottom:.85rem;flex-wrap:wrap}
+.period-pill{font-family:'Inconsolata',monospace;font-size:.72rem;padding:.22rem .68rem;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;transition:all .15s}
+.period-pill.active{background:var(--s3);border-color:var(--border2);color:var(--text)}
+.bar-chart{display:flex;align-items:flex-end;gap:.26rem;height:90px;padding-top:.4rem}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;height:100%;justify-content:flex-end}
+.bar-v{width:100%;border-radius:4px 4px 0 0;min-height:2px;position:relative;transition:height .45s ease-out}
+.bar-v:hover .bar-tip{opacity:1;transform:translateX(-50%) translateY(0)}
+.bar-tip{position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:.12rem .4rem;font-size:.67rem;white-space:nowrap;opacity:0;transition:all .15s;pointer-events:none;color:var(--text)}
+.rank-row{display:flex;align-items:center;gap:.55rem;padding:.46rem .62rem;border-radius:8px;background:var(--s1);border:1px solid var(--border);margin-bottom:.36rem}
+.rank-n{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:var(--muted);width:16px;text-align:center;flex-shrink:0}
+.rank-track{flex:1;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.rank-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.rank-t{font-size:.72rem;color:var(--muted2);flex-shrink:0;font-variant-numeric:tabular-nums}
+.streak-grid{display:flex;flex-wrap:wrap;gap:.2rem;margin-top:.5rem}
+.s-dot{width:18px;height:18px;border-radius:4px;background:var(--border);transition:background .2s;cursor:default;position:relative}
+.s-dot.done{background:var(--green)}.s-dot.today{background:var(--accent);box-shadow:0 0 8px rgba(232,197,71,.45)}
+.s-dot:hover::after{content:attr(data-date);position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:.12rem .36rem;font-size:.62rem;white-space:nowrap;pointer-events:none;z-index:10;color:var(--text)}
+
+/* sess score */
+.sess-score-banner{background:linear-gradient(135deg,rgba(232,197,71,.07),rgba(92,158,255,.05));border:1px solid var(--border2);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:.85rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.ssb-item{display:flex;flex-direction:column;gap:.15rem}
+.ssb-val{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;line-height:1}
+.ssb-lbl{font-size:.63rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em}
+.level-badge{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;padding:.25rem .65rem;border-radius:20px}
+.sess-score-hist{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
+.ssh-row{display:flex;align-items:center;gap:.6rem;font-size:.76rem}
+.ssh-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden}
+.ssh-bar-fill{height:100%;border-radius:4px;transition:width .6s ease-out}
+.ssh-name{width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2);flex-shrink:0}
+.ssh-pts{flex-shrink:0;font-weight:700;color:var(--accent);min-width:48px;text-align:right}
+
+/* log */
+.log-entry{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:.6rem .85rem;margin-bottom:.4rem}
+.log-date{font-size:.67rem;color:var(--muted2);margin-bottom:.2rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.log-date:hover{color:var(--text)}
+.log-body{overflow:hidden;transition:max-height .25s ease}
+.log-body.collapsed{max-height:0}
+.log-body.expanded{max-height:2000px}
+.log-q{color:var(--muted2);font-size:.76rem;margin-bottom:.1rem;margin-top:.38rem}
+.log-a{color:var(--text);font-size:.83rem;font-weight:500;line-height:1.45}
+.log-essay{color:var(--text);font-size:.82rem;line-height:1.58;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:.5rem .7rem;margin-top:.22rem;white-space:pre-wrap}
+
+/* report */
+.report-meta{font-size:.78rem;color:var(--muted2);margin-bottom:1rem}
+.report-body{font-size:.88rem;line-height:1.72;color:var(--text)}
+.report-body h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--accent);margin:1.3rem 0 .45rem;padding-bottom:.28rem;border-bottom:1px solid var(--border)}
+.report-body h3{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--blue);margin:.9rem 0 .3rem}
+.report-body p{margin-bottom:.6rem}
+.report-body ul{padding-left:1.1rem;margin-bottom:.6rem}
+.report-body li{margin-bottom:.28rem}
+.report-body strong{color:var(--accent)}
+.report-body .highlight{background:rgba(232,197,71,.07);border-left:3px solid var(--accent);padding:.45rem .7rem;border-radius:0 6px 6px 0;margin:.5rem 0}
+.report-skeleton{display:flex;flex-direction:column;gap:.55rem;padding:.4rem 0}
+.skel{background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.report-articles{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}
+.article-card{background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:.95rem 1.05rem}
+.article-meta{font-size:.68rem;color:var(--muted2);margin-bottom:.38rem}
+.article-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:var(--accent);margin-bottom:.5rem}
+.article-body{font-size:.83rem;line-height:1.65;color:var(--text);white-space:pre-wrap}
+
+/* ── SHOP ── */
+.total-pts-banner{background:linear-gradient(135deg,rgba(184,123,255,.1),rgba(232,197,71,.07));border:1px solid rgba(184,123,255,.3);border-radius:var(--radius);padding:1rem 1.2rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.7rem}
+.tpt-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--purple);line-height:1}
+.tpt-lbl{font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-top:.18rem}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.1rem}
+@media(max-width:420px){.shop-grid{grid-template-columns:1fr}}
+.shop-item{background:var(--s2);border:1px solid var(--border);border-radius:13px;padding:1rem;display:flex;flex-direction:column;gap:.45rem;transition:border-color .15s,box-shadow .15s;position:relative}
+.shop-item:hover:not(.locked){border-color:var(--border2);box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.shop-item.locked{opacity:.52}
+.shop-icon{font-size:1.65rem;line-height:1}
+.shop-name{font-family:'Syne',sans-serif;font-size:.86rem;font-weight:700}
+.shop-desc{font-size:.73rem;color:var(--muted2);line-height:1.42;flex:1}
+.shop-cost{display:flex;align-items:center;justify-content:space-between;margin-top:.2rem}
+.shop-pts{font-size:.76rem;font-weight:700;color:var(--purple)}
+.shop-buy-btn{font-family:'Inconsolata',monospace;font-size:.73rem;font-weight:600;padding:.28rem .68rem;border-radius:7px;border:1px solid var(--purple);background:rgba(184,123,255,.1);color:var(--purple);cursor:pointer;transition:all .15s;white-space:nowrap}
+.shop-buy-btn:hover{background:var(--purple);color:#0d001a}
+.shop-buy-btn:disabled{opacity:.4;cursor:not-allowed;border-color:var(--border)}
+.inv-item{display:inline-flex;align-items:center;gap:.3rem;border-radius:20px;padding:.2rem .58rem;font-size:.72rem;font-weight:600}
+.inv-item.freeze{background:rgba(92,158,255,.1);border:1px solid rgba(92,158,255,.25);color:var(--blue)}
+.inv-item.report{background:rgba(184,123,255,.1);border:1px solid rgba(184,123,255,.25);color:var(--purple)}
+.active-2x-badge{background:rgba(232,197,71,.15);border:1px solid rgba(232,197,71,.35);color:var(--accent);padding:.22rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;gap:.3rem}
+.ai-chat-box{background:var(--s2);border:1px solid var(--border);border-radius:13px;padding:1rem}
+.ai-msg{font-size:.85rem;line-height:1.68;color:var(--text);background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;margin-bottom:.65rem;white-space:pre-wrap;min-height:55px}
+.ai-msg.loading{color:var(--muted2);font-style:italic}
+.ai-ask-row{display:flex;gap:.5rem;align-items:flex-end}
+.ai-ask-row textarea{min-height:50px;max-height:110px;flex:1;font-size:.84rem;resize:none}
+.ai-cost-tag{font-size:.68rem;color:var(--purple);margin-top:.3rem;text-align:right}
+
+/* ── SCORE POPUP ── */
+.score-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.88);background:var(--s2);border:1px solid var(--border2);border-radius:20px;padding:1.65rem 1.9rem;text-align:center;z-index:600;opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.34,1.56,.64,1);min-width:270px;max-width:330px;width:90%;will-change:transform}
+.score-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}
+.sp-pts{font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:.28rem}
+.sp-label{font-size:.78rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.95rem}
+.sp-breakdown{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;text-align:left}
+.sp-row{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;padding:.28rem .48rem;border-radius:7px;background:var(--s1)}
+.sp-row.bonus{background:rgba(82,217,160,.06);border:1px solid rgba(82,217,160,.12)}
+.sp-row.penalty{background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.12)}
+.sp-row-label{color:var(--muted2)}
+.sp-row-val.pos{color:var(--green);font-weight:700}
+.sp-row-val.neg{color:var(--red);font-weight:700}
+.sp-row-val.neu{color:var(--accent);font-weight:700}
+
+/* ── MODALS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:18px;padding:1.55rem;width:100%;max-width:480px;transform:scale(.93) translateY(12px);transition:transform .22s ease-out;max-height:90vh;overflow-y:auto;will-change:transform}
+.overlay.open .modal{transform:none}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);margin-bottom:.8rem}
+.ci-q-body{overflow:hidden;transition:max-height .25s ease}
+.modal-question{font-size:.93rem;font-weight:600;color:var(--text);margin-bottom:.55rem;line-height:1.4}
+.modal-btns{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;margin-top:.9rem}
+.q-options{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.8rem}
+.q-opt-btn{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:.48rem .82rem;font-family:'Inconsolata',monospace;font-size:.82rem;color:var(--text);cursor:pointer;text-align:left;transition:all .15s}
+.q-opt-btn:hover,.q-opt-btn.picked{border-color:var(--accent);background:var(--s3);color:var(--accent)}
+.essay-prompt{font-size:.76rem;color:var(--muted2);margin-bottom:.38rem;font-style:italic;line-height:1.42}
+
+/* settings */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:.85rem}
+.setting-sub{font-size:.72rem;color:var(--muted2);margin-top:.1rem}
+.theme-pills{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
+.theme-pill{font-family:'Inconsolata',monospace;font-size:.72rem;padding:.25rem .65rem;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;transition:all .15s}
+.theme-pill.active{background:var(--s3);border-color:var(--accent);color:var(--accent)}
+.volume-row{display:flex;align-items:center;gap:.6rem;margin-top:.4rem}
+
+/* notif bar */
+.notif-bar{background:rgba(92,158,255,.08);border:1px solid rgba(92,158,255,.3);border-radius:10px;padding:.6rem .9rem;margin-bottom:.7rem;font-size:.78rem;color:var(--blue);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.3rem;right:1.3rem;background:var(--s3);border:1px solid var(--border2);border-radius:10px;padding:.6rem .9rem;font-size:.8rem;color:var(--text);transform:translateY(70px);opacity:0;transition:all .26s cubic-bezier(.34,1.56,.64,1);z-index:999;max-width:255px;pointer-events:none}
+.toast.show{transform:none;opacity:1}
+@media(max-width:620px){.toast{bottom:5.5rem}}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── ACHIEVEMENTS ── */
+.ach-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.8rem}
+@media(max-width:420px){.ach-grid{grid-template-columns:1fr 1fr}}
+.ach-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:.8rem .7rem;text-align:center}
+.ach-icon{font-size:1.6rem;display:block;margin-bottom:.3rem}
+.ach-val{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;line-height:1}
+.ach-lbl{font-size:.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:.18rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" id="logo">◈ PROGRAM</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showPage('program',this)">Program</button>
+    <button class="tab-btn" onclick="showPage('timer',this)">Zamanlayıcı</button>
+    <button class="tab-btn" onclick="showPage('tasks',this)">Görevler</button>
+    <button class="tab-btn" onclick="showPage('analiz',this)">Analiz</button>
+    <button class="tab-btn" onclick="showPage('magaza',this)">Mağaza</button>
+  </div>
+  <div class="nav-right">
+    <div class="conn-badge online" id="conn-badge"><div class="conn-dot"></div><span id="conn-text">Çevrimiçi</span></div>
+    <button class="nav-icon-btn" onclick="openModal('modal-settings')" title="Ayarlar">⚙️</button>
+  </div>
+</nav>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn active" id="bnav-program" onclick="showPage('program',this)"><span class="bi">🗓️</span><span class="bl">Program</span></button>
+    <button class="bnav-btn" id="bnav-timer" onclick="showPage('timer',this)"><span class="bi">⏱️</span><span class="bl">Timer</span></button>
+    <button class="bnav-btn" id="bnav-tasks" onclick="showPage('tasks',this)"><span class="bi">✅</span><span class="bl">Görevler</span></button>
+    <button class="bnav-btn" id="bnav-analiz" onclick="showPage('analiz',this)"><span class="bi">📊</span><span class="bl">Analiz</span></button>
+    <button class="bnav-btn" id="bnav-magaza" onclick="showPage('magaza',this)"><span class="bi">🛍️</span><span class="bl">Mağaza</span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ PROGRAM ═══ -->
+<div class="page active" id="page-program">
+  <div class="sec-title">Günlük Program</div>
+  <div class="card" style="margin-bottom:.7rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem">
+      <div class="field" style="grid-column:1/-1"><label>Etkinlik Adı</label><input id="inp-title" type="text" placeholder="Piyano çal, Kitap oku…" maxlength="50"/></div>
+      <div class="field"><label>🔔 Bildirim Saati</label><input id="inp-time" type="time" value="09:00"/></div>
+      <div class="field"><label>⏱ Süre (dakika)</label><input id="inp-dur" type="number" min="1" max="480" value="60" style="text-align:center"/></div>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:.6rem;margin-bottom:.6rem">
+      <div class="field" style="flex:1">
+        <label>Renk</label>
+        <div class="color-palette" id="color-palette"></div>
+      </div>
+      <button class="btn btn-accent" style="flex-shrink:0;padding:.6rem 1.1rem" onclick="addActivity()">+ Ekle</button>
+    </div>
+    <div id="notif-bar" class="notif-bar" style="display:none">🔔 Bildirim izni gerekli. <button class="btn btn-ghost btn-sm" onclick="reqNotif()">İzin Ver</button></div>
+  </div>
+  <div class="timeline" id="timeline"><div class="tasks-empty"><span style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.4">🗓️</span>Henüz etkinlik eklenmedi.</div></div>
+</div>
+
+<!-- ═══ TIMER ═══ -->
+<div class="page" id="page-timer">
+  <div class="sec-title">Zamanlayıcı</div>
+  <div class="g2" style="margin-bottom:.7rem;align-items:start">
+    <div class="card">
+      <div style="font-family:'Syne',sans-serif;font-size:.76rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.65rem">Etkinlik Seç</div>
+      <div class="act-pick-list" id="act-pick-list"><div style="color:var(--muted);font-size:.82rem">Program sekmesinden etkinlik ekle.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-family:'Syne',sans-serif;font-size:.76rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.65rem">Mod</div>
+      <div style="display:flex;flex-direction:column;gap:.38rem">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:.4rem .62rem;border-radius:8px;border:1px solid var(--border);background:var(--s1)"><input type="radio" name="tmode" value="countdown" checked style="accent-color:var(--accent);width:auto;flex-shrink:0">Geri sayım<span style="margin-left:auto;font-size:.68rem;color:var(--muted2)">60→0</span></label>
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:.4rem .62rem;border-radius:8px;border:1px solid var(--border);background:var(--s1)"><input type="radio" name="tmode" value="countup" style="accent-color:var(--accent);width:auto;flex-shrink:0">İleri sayım<span style="margin-left:auto;font-size:.68rem;color:var(--muted2)">0→∞</span></label>
+      </div>
+    </div>
+  </div>
+  <div style="background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:1.8rem 1.3rem;text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(232,197,71,.06),transparent 55%);pointer-events:none"></div>
+    <div class="mode-row">
+      <button class="mode-pill active" id="mpill-cd" onclick="setTimerMode('countdown')">⏳ Geri Sayım</button>
+      <button class="mode-pill" id="mpill-cu" onclick="setTimerMode('countup')">⏱ İleri Sayım</button>
+    </div>
+    <div class="t-act-name" id="t-name">— ETKİNLİK SEÇ —</div>
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 150 150"><circle class="r-bg" cx="75" cy="75" r="70"/><circle class="r-fill" id="r-fill" cx="75" cy="75" r="70"/></svg>
+      <div class="ring-inner"><div class="ring-pct" id="r-pct">0%</div><div class="ring-lbl">tamamlandı</div></div>
+    </div>
+    <div class="t-clock" id="t-clock">00:00</div>
+    <div class="t-controls">
+      <button class="btn btn-accent" id="btn-start" onclick="tStart()">▶ Başlat</button>
+      <button class="btn btn-ghost" id="btn-pause" style="display:none" onclick="tPause()">⏸ Duraklat</button>
+      <button class="btn btn-blue" id="btn-resume" style="display:none" onclick="tResume()">▶ Devam</button>
+      <button class="btn btn-red" id="btn-stop" style="display:none" onclick="tStop()">⏹ Bitir</button>
+      <button class="btn btn-ghost" id="btn-reset" onclick="tReset()">↺ Sıfırla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TASKS ═══ -->
+<div class="page" id="page-tasks">
+  <div class="sec-title">Görevler</div>
+  <!-- Score bar -->
+  <div class="task-score-bar">
+    <div>
+      <div class="score-main" id="task-score">0</div>
+      <div class="score-sub">bugünkü puan</div>
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem" id="task-score-chips"></div>
+    </div>
+    <div style="text-align:right;min-width:110px">
+      <div style="font-size:.68rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.25rem">Son 7 gün</div>
+      <div class="score-hist" id="score-hist"></div>
+    </div>
+  </div>
+
+  <!-- Weekly goals -->
+  <div class="card mt" id="weekly-goals-card">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.7rem;display:flex;align-items:center;justify-content:space-between">
+      🎯 Haftalık Hedefler
+      <button class="btn btn-ghost btn-sm" onclick="openModal('modal-goals')">Düzenle</button>
+    </div>
+    <div id="goals-list"><div style="color:var(--muted);font-size:.8rem">Hedef belirlenmedi. Düzenle'ye bas!</div></div>
+  </div>
+
+  <!-- Add task -->
+  <div class="card mt">
+    <div style="display:grid;grid-template-columns:1fr;gap:.5rem;margin-bottom:.5rem">
+      <div class="field"><label>Görev</label><input id="task-inp" type="text" placeholder="Odayı topla, Market alışverişi…" maxlength="80"/></div>
+    </div>
+    <div id="task-diff-preview" style="display:none;align-items:center;gap:.45rem;margin-bottom:.5rem;font-size:.78rem;color:var(--muted2)">
+      AI zorluk belirliyor… <span id="task-diff-spinner">⏳</span><span id="task-diff-result" style="font-weight:700"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.55rem">
+      <div class="field">
+        <label>🔔 Hatırlatma</label>
+        <input id="task-time" type="time"/>
+      </div>
+      <div class="field">
+        <label>🔁 Tekrar</label>
+        <select id="task-recur">
+          <option value="">Tek seferlik</option>
+          <option value="daily">Her gün</option>
+          <option value="weekdays">Hafta içi (Pzt-Cum)</option>
+          <option value="weekends">Hafta sonu</option>
+          <option value="mon">Her Pazartesi</option>
+          <option value="tue">Her Salı</option>
+          <option value="wed">Her Çarşamba</option>
+          <option value="thu">Her Perşembe</option>
+          <option value="fri">Her Cuma</option>
+          <option value="sat">Her Cumartesi</option>
+          <option value="sun">Her Pazar</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-accent" style="width:100%;justify-content:center;padding:.65rem" id="task-add-btn" onclick="addTask()">+ Görev Ekle</button>
+  </div>
+
+  <!-- Filter -->
+  <div style="display:flex;gap:.3rem;margin:(.7rem) 0 .65rem;flex-wrap:wrap;margin-top:.7rem">
+    <button class="period-pill active" onclick="setTaskFilter('all',this)">Tümü</button>
+    <button class="period-pill" onclick="setTaskFilter('todo',this)">Yapılacak</button>
+    <button class="period-pill" onclick="setTaskFilter('done',this)">Tamamlanan</button>
+    <button class="period-pill" onclick="setTaskFilter('recurring',this)">Tekrarlayan</button>
+    <button class="period-pill" style="margin-left:auto;color:var(--red);border-color:rgba(255,107,107,.3)" onclick="clearDoneTasks()">Tamamlananları Sil</button>
+  </div>
+  <div class="task-list" id="task-list"><div class="tasks-empty"><span style="font-size:1.8rem;display:block;margin-bottom:.5rem;opacity:.4">✅</span>Henüz görev yok.</div></div>
+</div>
+
+<!-- ═══ ANALİZ ═══ -->
+<div class="page" id="page-analiz">
+  <div class="sec-title">Analiz</div>
+  <div class="analiz-tabs">
+    <button class="analiz-tab active" onclick="setAnalizTab('stats',this)">📈 İstatistik</button>
+    <button class="analiz-tab" onclick="setAnalizTab('log',this)">📓 Günlük</button>
+    <button class="analiz-tab" onclick="setAnalizTab('report',this)">📊 Rapor</button>
+  </div>
+
+  <!-- İSTATİSTİK -->
+  <div class="analiz-section active" id="analiz-stats">
+    <!-- Total achievements -->
+    <div class="ach-grid" id="ach-grid"></div>
+    <!-- Session score banner -->
+    <div class="sess-score-banner" id="sess-score-banner"></div>
+    <!-- Stats cards -->
+    <div class="stats-top" id="stats-top"></div>
+    <div class="card mt">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.65rem">Süre Grafiği</div>
+      <div class="period-row">
+        <button class="period-pill active" onclick="setPeriod('week',this)">Haftalık</button>
+        <button class="period-pill" onclick="setPeriod('month',this)">Aylık</button>
+        <button class="period-pill" onclick="setPeriod('year',this)">Yıllık</button>
+      </div>
+      <div class="bar-chart" id="bar-chart"></div>
+      <div style="display:flex;gap:.25rem;margin-top:.25rem" id="bar-labels"></div>
+    </div>
+    <div class="g2 mt">
+      <div class="card">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.65rem">🏆 En Çok Yapılan</div>
+        <div id="top-acts"><div style="color:var(--muted);font-size:.8rem">Kayıt yok.</div></div>
+      </div>
+      <div class="card">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.25rem">🔥 Seri</div>
+        <div style="font-size:.71rem;color:var(--muted2);margin-bottom:.42rem">Son 30 gün</div>
+        <div class="streak-grid" id="streak-grid"></div>
+        <div style="font-size:.76rem;color:var(--muted2);margin-top:.5rem" id="streak-txt"></div>
+      </div>
+    </div>
+    <div class="card mt">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.65rem">⭐ Etkinlik Puan Dağılımı</div>
+      <div id="sess-score-breakdown"><div style="color:var(--muted);font-size:.8rem">Henüz oturum yok.</div></div>
+    </div>
+  </div>
+
+  <!-- GÜNLÜK -->
+  <div class="analiz-section" id="analiz-log">
+    <div id="log-list"><div class="tasks-empty"><span style="font-size:1.8rem;display:block;margin-bottom:.5rem;opacity:.4">📓</span>Henüz kayıt yok.</div></div>
+  </div>
+
+  <!-- RAPOR -->
+  <div class="analiz-section" id="analiz-report">
+    <div class="card" style="margin-bottom:.7rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.85rem">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:.25rem">Haftalık AI Raporu</div>
+          <div style="font-size:.76rem;color:var(--muted2)">Oturumların, görevlerin ve notlarının analizi.</div>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+          <select style="padding:.4rem .7rem;font-size:.8rem;width:auto" id="report-week">
+            <option value="0">Bu hafta</option>
+            <option value="1">Geçen hafta</option>
+            <option value="2">2 hafta önce</option>
+            <option value="3">3 hafta önce</option>
+          </select>
+          <button class="btn btn-purple btn-sm" onclick="generateReport()">✨ Rapor Oluştur</button>
+        </div>
+      </div>
+      <div id="report-output"></div>
+    </div>
+    <div id="report-articles-section" style="display:none">
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--blue);margin-bottom:.7rem">📝 Konu Makaleleri</div>
+      <div class="report-articles" id="report-articles"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAĞAZA ═══ -->
+<div class="page" id="page-magaza">
+  <div class="sec-title">Mağaza</div>
+  <div class="total-pts-banner">
+    <div>
+      <div class="tpt-val" id="shop-total-pts">0</div>
+      <div class="tpt-lbl">kullanılabilir puan</div>
+    </div>
+    <div id="shop-inventory" style="display:flex;gap:.35rem;flex-wrap:wrap"></div>
+  </div>
+  <div id="active-2x-row" style="display:none;margin-bottom:.7rem"></div>
+  <div style="font-family:'Syne',sans-serif;font-size:.76rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem">Ödüller</div>
+  <div class="shop-grid" id="shop-grid"></div>
+  <div style="font-family:'Syne',sans-serif;font-size:.76rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem">🤖 AI Koç</div>
+  <div class="ai-chat-box">
+    <div style="font-size:.78rem;color:var(--muted2);margin-bottom:.65rem;line-height:1.48">Puan harcayarak AI koçtan kişisel öneri alabilirsin.</div>
+    <div class="ai-msg loading" id="ai-msg">Bir soru sor… 💬</div>
+    <div class="ai-ask-row">
+      <textarea id="ai-input" placeholder="Bugün ne yapabilirim? / Hangi alana odaklanmalıyım?" rows="2"></textarea>
+      <div><button class="btn btn-purple" onclick="askAI()" id="ai-ask-btn">✨ Sor</button><div class="ai-cost-tag" id="ai-cost-tag">— puan</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE POPUP -->
+<div class="score-popup" id="score-popup">
+  <div class="sp-pts" id="sp-pts">+0</div>
+  <div class="sp-label">puan kazandın! 🎉</div>
+  <div class="sp-breakdown" id="sp-breakdown"></div>
+  <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="closeScorePopup()">Harika! ✨</button>
+</div>
+
+<!-- NOTIF MODAL -->
+<div class="overlay" id="modal-notif">
+  <div class="modal">
+    <div class="modal-title">⏰ Etkinlik Zamanı!</div>
+    <div style="font-size:.86rem;color:var(--muted2);margin-bottom:.8rem" id="mn-body"></div>
+    <div class="modal-question">Zamanlayıcıyı başlat:</div>
+    <div class="q-options">
+      <button class="q-opt-btn" onclick="notifStartTimer('countdown')">⏳ Geri Sayım — <span id="mn-dur"></span></button>
+      <button class="q-opt-btn" onclick="notifStartTimer('countup')">⏱ İleri Sayım — serbest</button>
+    </div>
+    <div class="modal-btns"><button class="btn btn-ghost" onclick="closeModal('modal-notif')">Şimdi Değil</button></div>
+  </div>
+</div>
+
+<!-- CHECKIN MODAL -->
+<div class="overlay" id="modal-checkin">
+  <div class="modal">
+    <div class="modal-title">✅ Oturum Tamamlandı!</div>
+    <div style="font-size:.78rem;color:var(--muted2);margin-bottom:.9rem" id="ci-session-info"></div>
+    <div id="ci-questions"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="skipCheckin()">Geç</button>
+      <button class="btn btn-accent" onclick="saveCheckin()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="modal-settings">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">⚙️ Ayarlar</div>
+    <div class="setting-row">
+      <div><div class="setting-label">🔔 Ses Bildirimi</div><div class="setting-sub">Timer bitince ses çalar</div></div>
+      <input type="checkbox" id="set-sound" onchange="saveSetting('sound',this.checked)" style="width:auto">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">🔊 Ses Seviyesi</div>
+        <div class="volume-row"><input type="range" id="set-volume" min="0" max="1" step=".1" value=".5" oninput="saveSetting('volume',+this.value);testSound()"><span id="vol-pct" style="font-size:.75rem;color:var(--muted2);min-width:28px">50%</span></div>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">📳 Titreşim</div><div class="setting-sub">Timer bitince titreşir</div></div>
+      <input type="checkbox" id="set-vib" onchange="saveSetting('vibration',this.checked)" style="width:auto">
+    </div>
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+      <div class="setting-label">🎨 Tema</div>
+      <div class="theme-pills">
+        <button class="theme-pill" data-theme="">Varsayılan</button>
+        <button class="theme-pill" data-theme="gray">Gri</button>
+        <button class="theme-pill" data-theme="black">Siyah</button>
+        <button class="theme-pill" data-theme="light">Açık</button>
+      </div>
+    </div>
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+      <div class="setting-label">🖼️ Arka Plan</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="clearBg()">Temizle</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">Resim Yükle<input type="file" accept="image/*" style="display:none" onchange="loadBgImage(this)"></label>
+        <input type="url" id="bg-url-inp" placeholder="Resim URL…" style="flex:1;min-width:120px;font-size:.78rem;padding:.38rem .6rem" onchange="setBgUrl(this.value)">
+      </div>
+    </div>
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+      <div class="setting-label">💾 Veri Yedekleme</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-green btn-sm" onclick="exportData()">⬇ Dışa Aktar</button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">⬆ İçe Aktar<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
+      </div>
+    </div>
+    <div class="modal-btns"><button class="btn btn-ghost" onclick="closeModal('modal-settings')">Kapat</button></div>
+  </div>
+</div>
+
+<!-- EDIT ACTIVITY MODAL -->
+<div class="overlay" id="modal-edit-act">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">✏️ Etkinliği Düzenle</div>
+    <div style="display:flex;flex-direction:column;gap:.55rem;margin-bottom:.8rem">
+      <div class="field"><label>Etkinlik Adı</label><input id="edit-title" type="text" maxlength="50"/></div>
+      <div class="g2">
+        <div class="field"><label>Bildirim Saati</label><input id="edit-time" type="time"/></div>
+        <div class="field"><label>Süre (dk)</label><input id="edit-dur" type="number" min="1" max="480" style="text-align:center"/></div>
+      </div>
+      <div class="field"><label>Renk</label><div class="color-palette" id="edit-color-palette"></div></div>
+    </div>
+    <input type="hidden" id="edit-act-id">
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-act')">İptal</button>
+      <button class="btn btn-accent" onclick="saveEditActivity()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOALS MODAL -->
+<div class="overlay" id="modal-goals">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">🎯 Haftalık Hedefler</div>
+    <div style="font-size:.8rem;color:var(--muted2);margin-bottom:.85rem">Her etkinlik için haftalık hedef süre (saat) gir.</div>
+    <div id="goals-modal-list"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal('modal-goals')">Kapat</button>
+      <button class="btn btn-accent" onclick="saveGoals()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL UP MODAL -->
+<div class="overlay" id="modal-levelup">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:.5rem" id="lu-icon">🎉</div>
+    <div class="modal-title" id="lu-title" style="justify-content:center">Yeni Seviye!</div>
+    <div style="font-size:.85rem;color:var(--muted2);margin-bottom:1rem" id="lu-msg"></div>
+    <div style="text-align:left;margin-bottom:.9rem">
+      <div style="font-size:.8rem;font-weight:700;margin-bottom:.4rem;color:var(--muted2)">Bu seviyeye özel soru ekle (opsiyonel):</div>
+      <textarea id="lu-question-inp" placeholder="Örn: Bu seviyede fark ettiğin en büyük gelişim neydi?" rows="2" style="min-height:55px;font-size:.82rem"></textarea>
+      <div style="font-size:.7rem;color:var(--muted2);margin-top:.3rem">Bu soru, bu seviyeye ulaşanların check-in ekranında görünecek.</div>
+    </div>
+    <div class="modal-btns" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('modal-levelup')">Geç</button>
+      <button class="btn btn-accent" onclick="saveLevelQuestion()">Soruyu Ekle ✨</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ✅ FIX: Timezone-safe today (lokal tarih, UTC değil)
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtHm(m){ if(!m||m<0) return '0dk'; if(m<60) return m+'dk'; const h=Math.floor(m/60),r=m%60; return h+'s'+(r?' '+r+'dk':''); }
+function fmtHmLong(m){ const h=Math.floor(m/60),r=m%60; if(!h) return r+' dakika'; if(!r) return h+' saat'; return h+' saat '+r+' dakika'; }
+function addEnd(s,d){ const [h,m]=(s||'00:00').split(':').map(Number),t=h*60+m+d; return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0'); }
+function shuffle(a){ return [...a].sort(()=>Math.random()-.5); }
+
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+function _safeJSON(key, def){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
+
+let activities    = _safeJSON('p5-acts', []);
+let sessions      = _safeJSON('p5-sess', []);
+let checkins      = _safeJSON('p5-ci', []);
+let tasks         = _safeJSON('p5-tasks', []);
+let taskScores    = _safeJSON('p5-tscr', {});
+let inventory     = _safeJSON('p5-inv', {freezes:0,reportCredits:0,aiAsks:0,doubledays:0});
+let totalSpent    = parseInt(localStorage.getItem('p5-spent') || '0') || 0;
+let sessScores    = _safeJSON('p5-sscr', {});
+let weeklyGoals   = _safeJSON('p5-goals', {});
+let settings      = _safeJSON('p5-set', {sound:true,volume:0.5,vibration:true,theme:'',bg:'',savedColors:['#e8c547','#5c9eff','#ff6b6b','#52d9a0','#b87bff','#ff9f45']});
+let levelQuestions= _safeJSON('p5-lvlq', {});
+let lastLevelLabel= localStorage.getItem('p5-lastlvl') || '';
+
+// Ensure settings has all required keys
+if(!settings.volume && settings.volume!==0) settings.volume=0.5;
+if(!settings.savedColors) settings.savedColors=['#e8c547','#5c9eff','#ff6b6b','#52d9a0','#b87bff','#ff9f45'];
+if(!inventory.freezes) inventory.freezes=0;
+if(!inventory.aiAsks) inventory.aiAsks=0;
+if(!inventory.doubledays) inventory.doubledays=0;
+if(!inventory.reportCredits) inventory.reportCredits=0;
+// ── Runtime state (declared early to prevent TDZ on slow mobile) ──
+let curAnalizTab    = 'stats';
+let curPeriod       = 'week';
+
+function save(){
+  localStorage.setItem('p5-acts',   JSON.stringify(activities));
+  localStorage.setItem('p5-sess',   JSON.stringify(sessions));
+  localStorage.setItem('p5-ci',     JSON.stringify(checkins));
+  localStorage.setItem('p5-tasks',  JSON.stringify(tasks));
+  localStorage.setItem('p5-tscr',   JSON.stringify(taskScores));
+  localStorage.setItem('p5-inv',    JSON.stringify(inventory));
+  localStorage.setItem('p5-spent',  String(totalSpent));
+  localStorage.setItem('p5-goals',  JSON.stringify(weeklyGoals));
+  localStorage.setItem('p5-set',    JSON.stringify(settings));
+  localStorage.setItem('p5-lvlq',   JSON.stringify(levelQuestions));
+  // sessScores saved separately in awardSessionScore
+}
+function saveSessScores(){ localStorage.setItem('p5-sscr', JSON.stringify(sessScores)); }
+
+// ════════════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════════════
+function saveSetting(key, val){
+  settings[key]=val;
+  save();
+  if(key==='theme') applyTheme();
+  if(key==='volume') $('vol-pct').textContent=Math.round(val*100)+'%';
+}
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', settings.theme||'');
+  document.querySelectorAll('.theme-pill').forEach(p=>{
+    p.classList.toggle('active', (p.dataset.theme||'')===(settings.theme||''));
+  });
+}
+function setBgUrl(url){
+  settings.bg=url; save();
+  document.documentElement.style.setProperty('--bg-image', url?`url('${url}')`:'none');
+}
+function loadBgImage(input){
+  const file=input.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{ setBgUrl(e.target.result); toast('🖼️ Arka plan ayarlandı!'); };
+  r.readAsDataURL(file);
+}
+function clearBg(){ setBgUrl(''); $('bg-url-inp').value=''; toast('🖼️ Arka plan temizlendi.'); }
+function initSettings(){
+  $('set-sound').checked = settings.sound!==false;
+  $('set-vib').checked   = settings.vibration!==false;
+  $('set-volume').value  = settings.volume??0.5;
+  $('vol-pct').textContent = Math.round((settings.volume??0.5)*100)+'%';
+  applyTheme();
+  if(settings.bg) document.documentElement.style.setProperty('--bg-image', `url('${settings.bg}')`);
+  document.querySelectorAll('.theme-pill').forEach(p=>{
+    p.addEventListener('click',()=>{ saveSetting('theme',p.dataset.theme||''); });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// SOUND (Web Audio API)
+// ════════════════════════════════════════════════════════════════
+function playSound(type='finish'){
+  if(settings.sound===false) return;
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const vol=settings.volume??0.5;
+    const seq = type==='finish'
+      ? [{f:660,t:0,d:.12},{f:880,t:.13,d:.12},{f:1100,t:.26,d:.22}]
+      : [{f:880,t:0,d:.1}];
+    seq.forEach(({f,t,d})=>{
+      const osc=ctx.createOscillator(); const g=ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.frequency.value=f; osc.type='sine';
+      g.gain.setValueAtTime(vol*.4,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+d);
+      osc.start(ctx.currentTime+t); osc.stop(ctx.currentTime+t+d);
+    });
+  }catch(e){ console.warn('Audio:',e); }
+}
+function testSound(){ playSound('tick'); }
+function doVibrate(pattern){
+  if(settings.vibration!==false && navigator.vibrate) navigator.vibrate(pattern);
+}
+
+// ════════════════════════════════════════════════════════════════
+// ONLINE / OFFLINE
+// ════════════════════════════════════════════════════════════════
+function updateConnBadge(){
+  const online=navigator.onLine;
+  const badge=$('conn-badge');
+  badge.className='conn-badge '+(online?'online':'offline');
+  $('conn-text').textContent=online?'Çevrimiçi':'Çevrimdışı';
+}
+window.addEventListener('online',  updateConnBadge);
+window.addEventListener('offline', updateConnBadge);
+
+// ════════════════════════════════════════════════════════════════
+// COLOR PALETTE
+// ════════════════════════════════════════════════════════════════
+const DEFAULT_COLORS=['#e8c547','#5c9eff','#ff6b6b','#52d9a0','#b87bff','#ff9f45','#ff6bce','#6bffee'];
+let selectedColor='#e8c547';
+let editSelectedColor='#e8c547';
+
+function buildPalette(containerId, currentColor, onSelect){
+  const el=$(containerId); if(!el) return;
+  const all=[...new Set([...DEFAULT_COLORS,...(settings.savedColors||[]),...[currentColor]])];
+  el.innerHTML = all.map(c=>`<div class="cp-swatch ${c===currentColor?'active':''}" style="background:${c}" data-c="${c}" onclick="(${onSelect.toString()})(this)"></div>`).join('')
+    +`<input type="color" class="cp-custom" value="${currentColor}" oninput="(${onSelect.toString()})(this,true)">`;
+}
+function selectMainColor(el, isCustom){
+  const c=isCustom?el.value:el.dataset.c;
+  selectedColor=c;
+  if(!settings.savedColors) settings.savedColors=[];
+  if(!settings.savedColors.includes(c)){ settings.savedColors.unshift(c); if(settings.savedColors.length>12) settings.savedColors.pop(); save(); }
+  document.querySelectorAll('#color-palette .cp-swatch').forEach(s=>s.classList.toggle('active',s.dataset.c===c));
+}
+function selectEditColor(el, isCustom){
+  const c=isCustom?el.value:el.dataset.c;
+  editSelectedColor=c;
+  if(!settings.savedColors) settings.savedColors=[];
+  if(!settings.savedColors.includes(c)){ settings.savedColors.unshift(c); if(settings.savedColors.length>12) settings.savedColors.pop(); save(); }
+  document.querySelectorAll('#edit-color-palette .cp-swatch').forEach(s=>s.classList.toggle('active',s.dataset.c===c));
+}
+
+// ════════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════════════════════════════
+let notifTimers=[]; let pendingNotifAct=null;
+function checkNotifPerm(){ $('notif-bar').style.display=('Notification' in window&&Notification.permission==='default')?'flex':'none'; }
+function reqNotif(){ Notification.requestPermission().then(p=>{ checkNotifPerm(); if(p==='granted'){scheduleAll();toast('✅ Bildirimler açık!');} else toast('❌ İzin reddedildi.'); }); }
+function scheduleAll(){
+  notifTimers.forEach(clearTimeout); notifTimers=[];
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const now=new Date();
+  activities.forEach(act=>{
+    const [h,m]=(act.notifTime||'09:00').split(':').map(Number);
+    const t=new Date(); t.setHours(h,m,0,0);
+    if(t<=now) t.setDate(t.getDate()+1);
+    notifTimers.push(setTimeout(()=>{ showNotifModal(act); scheduleAll(); }, t-now));
+  });
+}
+function showNotifModal(act){
+  pendingNotifAct=act;
+  $('mn-body').textContent=`"${act.title}" etkinliğinin zamanı!`;
+  $('mn-dur').textContent=fmtHm(act.dur);
+  openModal('modal-notif');
+  doVibrate([150,80,150]);
+}
+function notifStartTimer(mode){
+  closeModal('modal-notif');
+  if(!pendingNotifAct) return;
+  timerAct=pendingNotifAct; timerMode=mode;
+  showPage('timer',document.querySelectorAll('#bnav-timer,.tab-btn')[1]);
+  setTimeout(()=>{ renderActPickList(); syncModeUI(); updateDisplay(); },60);
+}
+
+// Schedule task notifications
+let taskNotifTimers=[];
+function scheduleTaskNotifs(){
+  taskNotifTimers.forEach(clearTimeout); taskNotifTimers=[];
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const now=new Date();
+  tasks.filter(t=>!t.done&&t.remindTime).forEach(t=>{
+    const [h,m]=(t.remindTime).split(':').map(Number);
+    const target=new Date(); target.setHours(h,m,0,0);
+    if(target<=now) return;
+    taskNotifTimers.push(setTimeout(()=>{
+      doVibrate([100,50,100]);
+      new Notification('📋 Görev Hatırlatıcısı',{body:t.title+' ('+String(DIFF_PTS_MAX[getDiffCategory(t.pts||7)]||'?')+'pt)',data:{page:'tasks'}});
+    }, target-now));
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// PROGRAM PAGE
+// ════════════════════════════════════════════════════════════════
+function addActivity(){
+  const title=$('inp-title').value.trim();
+  const time=$('inp-time').value;
+  const dur=parseInt($('inp-dur').value);
+  if(!title){ $('inp-title').focus(); return; }
+  if(!dur||dur<1||dur>480){ toast('⚠️ Süre 1–480 dakika arası!'); return; }
+  activities.push({id:Date.now(),title,notifTime:time,dur,color:selectedColor});
+  activities.sort((a,b)=>(a.notifTime||'').localeCompare(b.notifTime||''));
+  $('inp-title').value='';
+  save(); renderTimeline(); scheduleAll(); checkNotifPerm();
+  buildPalette('color-palette',selectedColor,selectMainColor);
+  toast('✅ '+title+' eklendi');
+}
+function delActivity(id){
+  activities=activities.filter(a=>a.id!==id);
+  save(); renderTimeline(); renderActPickList(); toast('🗑️ Silindi');
+}
+function openEditActivity(id){
+  const a=activities.find(x=>x.id===id); if(!a) return;
+  $('edit-act-id').value=id;
+  $('edit-title').value=a.title;
+  $('edit-time').value=a.notifTime||'09:00';
+  $('edit-dur').value=a.dur;
+  editSelectedColor=a.color||'#e8c547';
+  buildPalette('edit-color-palette',editSelectedColor,selectEditColor);
+  openModal('modal-edit-act');
+}
+function saveEditActivity(){
+  const id=parseInt($('edit-act-id').value);
+  const a=activities.find(x=>x.id===id); if(!a) return;
+  const title=$('edit-title').value.trim();
+  const dur=parseInt($('edit-dur').value);
+  if(!title||!dur||dur<1) return;
+  a.title=title; a.notifTime=$('edit-time').value; a.dur=dur; a.color=editSelectedColor;
+  activities.sort((a,b)=>(a.notifTime||'').localeCompare(b.notifTime||''));
+  save(); renderTimeline(); renderActPickList(); closeModal('modal-edit-act');
+  toast('✅ Kaydedildi');
+}
+function pickAndGo(id){
+  timerAct=activities.find(a=>a.id===id);
+  showPage('timer',null);
+  setTimeout(()=>{ renderActPickList(); tReset(); },60);
+}
+function renderTimeline(){
+  const tl=$('timeline');
+  if(!activities.length){ tl.innerHTML='<div class="tasks-empty"><span style="font-size:1.8rem;display:block;margin-bottom:.5rem;opacity:.4">🗓️</span>Henüz etkinlik eklenmedi.</div>'; return; }
+  tl.innerHTML=activities.map((a,i)=>`
+    <div class="tl-row">
+      <div class="tl-time">${a.notifTime||''}</div>
+      <div class="tl-spine">
+        <div class="tl-dot"></div>
+        ${i<activities.length-1?'<div class="tl-seg"></div>':''}
+      </div>
+      <div class="tl-card" style="color:${a.color||'#e8c547'};border-left-color:${a.color||'#e8c547'}" onclick="pickAndGo(${a.id})">
+        <div class="tl-info">
+          <div class="tl-name">${esc(a.title)}</div>
+          <div class="tl-sub">🔔 ${a.notifTime||'?'} &nbsp;·&nbsp; ⏱ ${fmtHm(a.dur)} &nbsp;·&nbsp; ≈${addEnd(a.notifTime,a.dur)}'de biter</div>
+        </div>
+        <span class="tl-badge" style="background:${a.color||'#e8c547'}22;color:${a.color||'#e8c547'}">${fmtHm(a.dur)}</span>
+        <button class="tl-edit" onclick="event.stopPropagation();openEditActivity(${a.id})">✏️</button>
+        <button class="tl-del"  onclick="event.stopPropagation();delActivity(${a.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════════════════════════
+let timerAct=null,timerMode='countdown',timerSecs=0,timerRunning=false,timerIv=null,timerStartTs=null,timerDone=false;
+let pendingCheckinSess=null;
+const CIRC=439.82;
+
+function renderActPickList(){
+  const list=$('act-pick-list');
+  if(!activities.length){ list.innerHTML='<div style="color:var(--muted);font-size:.8rem">Program sekmesinden etkinlik ekle.</div>'; return; }
+  list.innerHTML=activities.map(a=>`
+    <div class="act-pick ${timerAct&&timerAct.id===a.id?'sel':''}" onclick="selectAct(${a.id})">
+      <div class="apc-dot" style="background:${a.color||'#e8c547'}"></div>
+      <div class="apc-name">${esc(a.title)}</div>
+      <div class="apc-dur">${fmtHm(a.dur)}</div>
+      <span class="apc-check">✓</span>
+    </div>`).join('');
+}
+function selectAct(id){
+  if(timerRunning){ toast('⚠️ Önce durdur.'); return; }
+  timerAct=activities.find(a=>a.id===id); tReset(); renderActPickList();
+}
+function setTimerMode(m){
+  if(timerRunning){ toast('⚠️ Önce durdur.'); return; }
+  timerMode=m; syncModeUI(); tReset();
+}
+function syncModeUI(){
+  $('mpill-cd').classList.toggle('active',timerMode==='countdown');
+  $('mpill-cu').classList.toggle('active',timerMode==='countup');
+  document.querySelectorAll('input[name="tmode"]').forEach(r=>r.checked=(r.value===timerMode));
+}
+function updateDisplay(){
+  const act=timerAct;
+  $('t-name').textContent=act?act.title.toUpperCase():'— ETKİNLİK SEÇ —';
+  const total=act?act.dur*60:0;
+  const disp=timerMode==='countdown'?Math.max(0,total-timerSecs):timerSecs;
+  const m=Math.floor(disp/60), s=disp%60;
+  $('t-clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const pct=total>0?Math.min(timerSecs/total,1):0;
+  $('r-fill').style.strokeDashoffset=CIRC*(1-pct);
+  $('r-pct').textContent=Math.round(pct*100)+'%';
+  const cl=$('t-clock'); cl.className='t-clock';
+  if(timerDone) cl.classList.add('done');
+  else if(timerRunning) cl.classList.add('running');
+  else if(timerSecs>0) cl.classList.add('paused');
+  const rc=timerDone?'var(--red)':timerRunning?'var(--green)':timerSecs>0?'var(--blue)':'var(--green)';
+  $('r-fill').style.stroke=rc; $('r-pct').style.color=rc;
+}
+function timerTick(){
+  timerSecs=Math.round((Date.now()-timerStartTs)/1000);
+  updateDisplay();
+  if(timerMode==='countdown'&&timerAct&&timerSecs>=timerAct.dur*60) tFinish();
+}
+function saveTimerState(){
+  if(!timerAct||!timerRunning){ localStorage.removeItem('p5-timer'); return; }
+  localStorage.setItem('p5-timer',JSON.stringify({actId:timerAct.id,mode:timerMode,startTs:timerStartTs,running:timerRunning}));
+}
+function restoreTimerState(){
+  const raw=localStorage.getItem('p5-timer'); if(!raw) return;
+  try{
+    const st=JSON.parse(raw);
+    const act=activities.find(a=>a.id===st.actId); if(!act){localStorage.removeItem('p5-timer');return;}
+    timerAct=act; timerMode=st.mode||'countdown'; timerStartTs=st.startTs; timerRunning=st.running; timerDone=false;
+    timerSecs=Math.round((Date.now()-timerStartTs)/1000);
+    syncModeUI(); renderActPickList();
+    if(timerRunning){ showBtns(false,true,false,true); timerIv=setInterval(timerTick,250); toast('⏱ '+act.title+' devam ediyor!',3000); }
+    else showBtns(false,false,true,true);
+    updateDisplay();
+    if(timerMode==='countdown'&&act&&timerSecs>=act.dur*60) tFinish();
+  }catch(e){localStorage.removeItem('p5-timer');}
+}
+function tStart(){
+  if(!timerAct){toast('⚠️ Önce etkinlik seç!');return;}
+  timerDone=false; timerRunning=true; timerStartTs=Date.now()-timerSecs*1000;
+  saveTimerState(); showBtns(false,true,false,true);
+  timerIv=setInterval(timerTick,250);
+}
+function tPause(){ clearInterval(timerIv); timerRunning=false; saveTimerState(); showBtns(false,false,true,true); updateDisplay(); }
+function tResume(){
+  timerDone=false; timerStartTs=Date.now()-timerSecs*1000; timerRunning=true;
+  saveTimerState(); showBtns(false,true,false,true);
+  timerIv=setInterval(timerTick,250);
+}
+function tStop(){
+  clearInterval(timerIv); timerRunning=false; timerDone=false;
+  localStorage.removeItem('p5-timer');
+  const mins=Math.round(timerSecs/60);
+  if(mins>=1&&timerAct){
+    const s={id:Date.now(),actId:timerAct.id,actName:timerAct.title,actColor:timerAct.color,date:today(),minutes:mins};
+    sessions.push(s); save();
+    pendingCheckinSess=s;
+    awardSessionScore(s,false);
+    toast('✅ '+fmtHm(mins)+' kaydedildi!');
+  }
+  timerSecs=0; showBtns(true,false,false,false); updateDisplay();
+}
+function tFinish(){
+  clearInterval(timerIv); timerRunning=false; timerDone=true;
+  localStorage.removeItem('p5-timer');
+  playSound('finish'); doVibrate([200,100,200,100,200]);
+  if(Notification.permission==='granted') new Notification('🎉 '+timerAct.title+' tamamlandı!',{body:fmtHmLong(timerAct.dur)+' bitti!',data:{page:'timer'}});
+  const s={id:Date.now(),actId:timerAct.id,actName:timerAct.title,actColor:timerAct.color,date:today(),minutes:timerAct.dur};
+  sessions.push(s); save();
+  timerSecs=timerAct.dur*60;
+  showBtns(true,false,false,false); updateDisplay();
+  pendingCheckinSess=s;
+  awardSessionScore(s,true);
+  toast('🎉 '+timerAct.title+' tamamlandı!',3500);
+}
+function tReset(){
+  clearInterval(timerIv); timerRunning=false; timerDone=false; timerSecs=0;
+  localStorage.removeItem('p5-timer');
+  showBtns(true,false,false,false); updateDisplay();
+}
+function showBtns(st,pa,re,sp){
+  $('btn-start').style.display=st?'':'none'; $('btn-pause').style.display=pa?'':'none';
+  $('btn-resume').style.display=re?'':'none'; $('btn-stop').style.display=sp?'':'none';
+}
+// Visibility change: fix background timer
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ if(timerRunning) saveTimerState(); }
+  else {
+    if(timerRunning&&timerStartTs){
+      timerSecs=Math.round((Date.now()-timerStartTs)/1000); updateDisplay();
+      if(timerMode==='countdown'&&timerAct&&timerSecs>=timerAct.dur*60) tFinish();
+    }
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// TASKS
+// ════════════════════════════════════════════════════════════════
+const DIFF_PTS_MAX={easy:5,medium:12,hard:20};
+const DIFF_COLORS={easy:'#52d9a0',medium:'#e8c547',hard:'#ff6b6b'};
+const DIFF_LABELS={easy:'⚡ Kolay',medium:'🔥 Orta',hard:'💀 Zor'};
+let taskFilter='all';
+let diffDebounce=null; let pendingDiff=null; let pendingPts=null;
+
+function getDiffCategory(pts){
+  if(pts<=5) return 'easy';
+  if(pts<=12) return 'medium';
+  return 'hard';
+}
+
+function extractJSON(text){
+  text=text.replace(/```[\w]*\n?/g,'').trim();
+  try{return JSON.parse(text);}catch(e){}
+  const m=text.match(/\{[^}]+\}/);
+  if(m){try{return JSON.parse(m[0]);}catch(e){}}
+  return null;
+}
+
+async function callDiffAPI(taskTitle){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",max_tokens:200,
+      messages:[{role:"user",content:`Sen bir kişisel gelişim asistanısın. Aşağıdaki görevi 1-20 puan arasında puanla. SADECE JSON döndür.
+
+━━ PUANLAMA REHBERİ ━━
+
+🟢 KOLAY (1-5 puan): Fiziksel, 1-10 dakika, karar gerektirmez.
+Örnekler: su iç (1), alarm kur (1), mesaj gönder (2), diş fırçala (1), mektup oku (2), çöp çıkar (3), yüz yıka (1), vitamin al (1), pencereyi aç (1), ışığı kapat (1), not al (2), hatırlatıcı kur (2), kısa egzersiz (4), 5 dk yürü (3), su şişesi doldur (1)
+
+🟡 ORTA (6-12 puan): 15-60 dakika, planlama gerektirir.
+Örnekler: market alışverişi (8), randevu al (6), e-posta yaz (7), odayı topla (9), form doldur (8), rapor hazırla başlangıcı (10), proje planla (11), ders çalış (10), araştırma yap (10), sunum slaytı (11), kitap bölümü oku (8), CV güncelle (10), fatura öde (7), özet çıkar (9), 30 dk yürüyüş (6)
+
+🔴 ZOR (13-20 puan): 1 saat+ VEYA duygusal/zihinsel olarak yoğun.
+Örnekler: ödev teslim et (15), zor konuşma yap (18), özür dile (16), büyük karar ver (20), iş başvurusu (17), proje sun (18), çatışmayı çöz (17), uzun rapor yaz (15), sınava gir (19), önemli e-posta yaz (14), bütçe planla (16), tez bölümü yaz (18), performans değerlendirmesi (17), müzakere et (18), stratejik plan (20)
+
+⚠️ TUTARLI OL: Benzer görevlere benzer puan ver. "Kolay" deme — gerçekçi ol.
+
+Görev: "${taskTitle}"
+
+SADECE bu JSON formatını döndür (başka hiçbir şey yazma):
+{"pts":7,"diff":"medium","reason":"15-30 dakika sürer"}`}]
+    })
+  });
+  if(!res.ok){ const e=await res.text(); throw new Error('API '+res.status+': '+e); }
+  const data=await res.json();
+  if(data.error) throw new Error(data.error.message);
+  const raw=data.content?.find(b=>b.type==='text')?.text||'';
+  const parsed=extractJSON(raw);
+  if(!parsed||typeof parsed.pts!=='number'||parsed.pts<1||parsed.pts>20) throw new Error('Geçersiz: '+raw);
+  return parsed;
+}
+
+async function detectDifficulty(taskTitle){
+  const preview=$('task-diff-preview'), spinner=$('task-diff-spinner'), result=$('task-diff-result');
+  preview.style.display='flex'; spinner.textContent='⏳'; result.textContent=''; pendingDiff=null; pendingPts=null;
+  try{
+    const parsed=await callDiffAPI(taskTitle);
+    pendingPts=Math.round(Math.max(1,Math.min(20,parsed.pts)));
+    pendingDiff=parsed.diff;
+    spinner.textContent='';
+    const cat=getDiffCategory(pendingPts);
+    result.innerHTML=`<span style="color:${DIFF_COLORS[cat]};font-weight:700">${DIFF_LABELS[cat]} (+${pendingPts} pt)</span>`
+      +(parsed.reason?` <span style="color:var(--muted2);font-size:.7rem">— ${esc(parsed.reason)}</span>`:'');
+  }catch(e){
+    console.warn('diff detect:',e.message);
+    spinner.textContent='';
+    if(!navigator.onLine){
+      pendingPts=7; pendingDiff='medium';
+      result.innerHTML='<span style="color:var(--accent);font-weight:700">🔥 Orta (+7 pt)</span> <span style="color:var(--muted2);font-size:.7rem">— çevrimdışı varsayılan</span>';
+    } else {
+      pendingPts=7; pendingDiff='medium';
+      result.innerHTML='<span style="color:var(--muted2)">belirlenemedi (+7 pt varsayılan)</span>';
+    }
+  }
+}
+
+async function addTask(){
+  const title=$('task-inp').value.trim();
+  if(!title){ $('task-inp').focus(); return; }
+  // Duplicate check
+  const dup=tasks.find(t=>t.title.toLowerCase()===title.toLowerCase()&&!t.done);
+  if(dup){ toast('⚠️ Bu görev zaten listede: "'+title+'"'); return; }
+
+  const btn=$('task-add-btn'); btn.disabled=true; btn.textContent='⏳ Ekliyor…';
+  let pts=pendingPts, diff=pendingDiff;
+  if(!pts){
+    try{
+      const p=await callDiffAPI(title);
+      pts=Math.round(Math.max(1,Math.min(20,p.pts))); diff=p.diff;
+    }catch(e){ pts=7; diff='medium'; }
+  }
+  const remindTime=$('task-time').value||null;
+  const recur=$('task-recur').value||null;
+  tasks.push({id:Date.now(),title,pts,diff,done:false,doneDate:null,createdDate:today(),remindTime,recur});
+  $('task-inp').value=''; $('task-time').value=''; $('task-recur').value='';
+  $('task-diff-preview').style.display='none'; pendingDiff=null; pendingPts=null;
+  btn.disabled=false; btn.textContent='+ Görev Ekle';
+  save(); renderTasks(); renderTaskScore(); scheduleTaskNotifs();
+  const cat=getDiffCategory(pts);
+  toast(`${DIFF_LABELS[cat]} (+${pts} pt) olarak eklendi! 🎉`);
+}
+
+function setTaskFilter(f,btn){
+  taskFilter=f;
+  document.querySelectorAll('#page-tasks .period-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function toggleTask(id){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  t.done=!t.done; t.doneDate=t.done?today():null;
+  const d=today();
+  if(!taskScores[d]) taskScores[d]=0;
+  let pts=t.pts||7;
+  // 2x puan günü
+  if(t.done&&(inventory.doubledays||0)>0){ pts*=2; inventory.doubledays--; save(); }
+  if(t.done) taskScores[d]+=pts;
+  else taskScores[d]=Math.max(0,taskScores[d]-pts);
+  save(); renderTasks(); renderTaskScore();
+  if(t.done){ toast(`+${pts} puan! 🎉`); playSound('tick'); checkAutoFreeze(); }
+}
+
+function deleteTask(id){ tasks=tasks.filter(x=>x.id!==id); save(); renderTasks(); renderTaskScore(); }
+
+function clearDoneTasks(){
+  tasks=tasks.filter(t=>!t.done||t.recur); save(); renderTasks(); renderTaskScore(); toast('🗑️ Silindi');
+}
+
+function renderTasks(){
+  const list=$('task-list');
+  let filtered=[...tasks];
+  if(taskFilter==='todo')      filtered=tasks.filter(t=>!t.done);
+  if(taskFilter==='done')      filtered=tasks.filter(t=>t.done);
+  if(taskFilter==='recurring') filtered=tasks.filter(t=>t.recur);
+  if(!filtered.length){
+    list.innerHTML=`<div class="tasks-empty"><span style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4">${taskFilter==='done'?'🎊':'✅'}</span>${taskFilter==='done'?'Tamamlanan görev yok.':taskFilter==='todo'?'Tüm görevler tamamlandı! 🎉':'Görev yok.'}</div>`;
+    return;
+  }
+  const sorted=[...filtered].sort((a,b)=>{ if(a.done===b.done) return b.id-a.id; return a.done?1:-1; });
+  list.innerHTML=sorted.map(t=>{
+    const cat=getDiffCategory(t.pts||7);
+    const recurLabel=t.recur?`<span class="task-recur-badge">🔁 ${getRecurLabel(t.recur)}</span>`:'';
+    return `<div class="task-item ${t.done?'done':''}" id="ti-${t.id}">
+      <div class="task-cb" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div class="task-title">${esc(t.title)}</div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.15rem">${recurLabel}${t.remindTime?`<span class="task-remind">🔔 ${t.remindTime}</span>`:''}</div>
+      </div>
+      <span class="task-diff-badge" style="background:${DIFF_COLORS[cat]}18;color:${DIFF_COLORS[cat]}">${DIFF_LABELS[cat]}</span>
+      <span class="task-pts" style="color:${DIFF_COLORS[cat]}">+${t.pts||7}</span>
+      <button class="task-del" onclick="deleteTask(${t.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function getRecurLabel(r){
+  const m={daily:'Her gün',weekdays:'Hft içi',weekends:'Hft sonu',mon:'Pzt',tue:'Sal',wed:'Çar',thu:'Per',fri:'Cum',sat:'Cmt',sun:'Paz'};
+  return m[r]||r;
+}
+
+function renderTaskScore(){
+  const d=today(); const pts=taskScores[d]||0;
+  $('task-score').textContent=pts;
+  const doneToday=tasks.filter(t=>t.done&&t.doneDate===d);
+  const byDiff={easy:0,medium:0,hard:0};
+  doneToday.forEach(t=>byDiff[getDiffCategory(t.pts||7)]++);
+  $('task-score-chips').innerHTML=Object.entries(byDiff).filter(([,c])=>c>0)
+    .map(([d,c])=>`<span style="font-size:.68rem;padding:.15rem .42rem;border-radius:20px;background:${DIFF_COLORS[d]}18;color:${DIFF_COLORS[d]};font-weight:600">${DIFF_LABELS[d].split(' ')[1]}: ${c}</span>`).join('');
+  const hist=$('score-hist');
+  const days7=[]; for(let i=6;i>=0;i--){const x=new Date();x.setDate(x.getDate()-i);days7.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'));}
+  const vals=days7.map(d=>taskScores[d]||0);
+  const maxV=Math.max(...vals,1);
+  const DAY=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+  hist.innerHTML=days7.map((d,i)=>{
+    const h=Math.round((vals[i]/maxV)*100);
+    const dn=DAY[new Date(d+'T12:00:00').getDay()];
+    return `<div class="sh-bar" style="height:${Math.max(h,3)}%;opacity:${d===today()?'1':'.45'}" data-tip="${dn}: ${vals[i]}pt"></div>`;
+  }).join('');
+  renderGoals();
+}
+
+// ════════════════════════════════════════════════════════════════
+// WEEKLY GOALS
+// ════════════════════════════════════════════════════════════════
+function renderGoals(){
+  const el=$('goals-list'); if(!el) return;
+  const keys=Object.keys(weeklyGoals).filter(k=>weeklyGoals[k]>0);
+  if(!keys.length){ el.innerHTML='<div style="color:var(--muted);font-size:.78rem">Hedef belirlenmedi.</div>'; return; }
+  // This week sessions
+  const now=new Date();
+  const mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()+6)%7)); mon.setHours(0,0,0,0);
+  const monStr=mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0');
+  el.innerHTML=keys.map(act=>{
+    const goal=weeklyGoals[act]; // minutes
+    const done=sessions.filter(s=>s.actName===act&&s.date>=monStr).reduce((s,x)=>s+x.minutes,0);
+    const pct=Math.min(Math.round((done/goal)*100),100);
+    const col=activities.find(a=>a.title===act)?.color||'var(--accent)';
+    return `<div class="goal-item">
+      <div class="goal-header">
+        <span style="font-weight:600">${esc(act)}</span>
+        <span style="color:var(--muted2)">${fmtHm(done)} / ${fmtHm(goal)}</span>
+      </div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+}
+function openGoalsModal(){
+  const list=$('goals-modal-list');
+  list.innerHTML=activities.map(a=>`
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem">
+      <div style="width:10px;height:10px;border-radius:50%;background:${a.color||'#e8c547'};flex-shrink:0"></div>
+      <div style="flex:1;font-size:.85rem">${esc(a.title)}</div>
+      <input type="number" min="0" max="600" placeholder="dk" value="${weeklyGoals[a.title]||''}" data-act="${esc(a.title)}" style="width:72px;text-align:center;font-size:.82rem;padding:.35rem .5rem">
+      <span style="font-size:.72rem;color:var(--muted2)">dk/hafta</span>
+    </div>`).join('');
+  openModal('modal-goals');
+}
+function saveGoals(){
+  $('goals-modal-list').querySelectorAll('input[data-act]').forEach(inp=>{
+    const act=inp.getAttribute('data-act');
+    const v=parseInt(inp.value)||0;
+    if(v>0) weeklyGoals[act]=v; else delete weeklyGoals[act];
+  });
+  save(); renderGoals(); closeModal('modal-goals'); toast('🎯 Hedefler kaydedildi!');
+}
+
+// ════════════════════════════════════════════════════════════════
+// RECURRING TASKS
+// ════════════════════════════════════════════════════════════════
+function processRecurringTasks(){
+  const d=today();
+  const dow=new Date().getDay(); // 0=Sun,1=Mon,...
+  const dowMap={mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,sun:0};
+  const weekdays=[1,2,3,4,5]; const weekends=[0,6];
+  tasks.filter(t=>t.recur).forEach(t=>{
+    // Check if already added today
+    const alreadyToday=tasks.some(x=>x.title===t.title&&x.createdDate===d&&x.id!==t.id&&!x.recur);
+    if(alreadyToday) return;
+    let shouldAdd=false;
+    if(t.recur==='daily') shouldAdd=true;
+    else if(t.recur==='weekdays') shouldAdd=weekdays.includes(dow);
+    else if(t.recur==='weekends') shouldAdd=weekends.includes(dow);
+    else if(dowMap[t.recur]!==undefined) shouldAdd=dowMap[t.recur]===dow;
+    if(shouldAdd){
+      tasks.push({id:Date.now()+Math.random(),title:t.title,pts:t.pts,diff:t.diff,done:false,doneDate:null,createdDate:d,remindTime:t.remindTime,recur:null,fromRecur:true});
+    }
+  });
+  save();
+}
+
+// ════════════════════════════════════════════════════════════════
+// CHECK-IN
+// ════════════════════════════════════════════════════════════════
+let ciSess=null, ciQs=[];
+
+// ─── QUESTION BANK (500+ sorular) ───────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// GENIŞLETILMIŞ SORU BANKASI (QB) — 600+ soru, 28 kategori
+// ════════════════════════════════════════════════════════════════
+const QB={
+
+// ─────────────────────────────────────────────────────────
+// 1. VARSAYILAN  (tüm oturumlar için temel sorular)
+// ─────────────────────────────────────────────────────────
+default:[
+  {q:"Bu oturum nasıl geçti?",t:"choice",o:["Harika 🚀","İyi 👍","Orta 🤷","Yorucu 😴","Zor 😟","Verimsiz 😕"]},
+  {q:"Konsantrasyonunu nasıl değerlendirirsin?",t:"choice",o:["Tam odak 🎯","Çoğunlukla odaklıydım","Orta düzeyde","Sık sık dağıldım","Hiç odaklanamadım"]},
+  {q:"Hedefine ne kadar ulaştın?",t:"choice",o:["Tamamen ✅","%75","%50","%25","Hiç 😢"]},
+  {q:"Bu oturumda enerjin nasıldı?",t:"choice",o:["Çok yüksek ⚡","Yüksek","Normal","Düşük","Çok düşük"]},
+  {q:"Bugün öğrendiğin en değerli şey nedir?",t:"text"},
+  {q:"Bir sonraki oturumda neyi farklı yapacaksın?",t:"text"},
+  {q:"Bu oturum sana nasıl hissettirdi?",t:"choice",o:["Başarılı ve tatmin olmuş","Üretken ama yorgun","Sakin ve odaklı","Karmaşık hissler","Hayal kırıklığı"]},
+  {q:"Oturuma nasıl hazırlandın?",t:"choice",o:["Önceden plan yaptım","Kısmen hazırlandım","Hazırlanmadan başladım","Kendiliğinden geldi"]},
+  {q:"Dikkatini en çok ne dağıttı?",t:"choice",o:["Telefon/sosyal medya","Gürültü/çevre","Yorgunluk","İç sesler/düşünceler","Hiçbir şey"]},
+  {q:"Bu oturumda en büyük zorluğun neydi?",t:"text"},
+  {q:"Bir sonraki oturumun ana hedefi ne olacak?",t:"text"},
+  {q:"Bu çalışmanın uzun vadeli hedeflerine katkısını değerlendir:",t:"text"},
+  {q:"Günün geri kalanı için nasıl bir his taşıyorsun?",t:"choice",o:["Motive ve enerjik","Sakin ve dengeli","Yorgun ama tatminkar","Yorgun ve gergin","Belirsiz"]},
+  {q:"Bugün kendine en iyi şekilde davrandın mı?",t:"choice",o:["Evet, kesinlikle","Büyük ölçüde","Orta düzeyde","Hayır, daha iyisini yapabilirdim"]},
+  {q:"Bu oturumda sürpriz bir keşif ya da fikir oldu mu?",t:"text"},
+  {q:"Gelecek hafta bu konuda nerede olmak istiyorsun?",t:"text"},
+  {q:"Motivasyonun nereden geldi?",t:"choice",o:["İçsel istek","Hedef hatırlattı","Alışkanlık gücü","Dışsal baskı/sorumluluk","Rastlantı"]},
+  {q:"Odaklanmak için ne yaptın?",t:"choice",o:["Sessiz ortam","Müzik/gürültü maskesi","Zamanlayıcı","Telefonu kapadım","Hiçbir şey yapmadım"]},
+  {q:"Bu oturum seni daha iyi bir versiyon yapmaya nasıl katkı sağladı?",t:"essay",hint:"Somut bir beceri, alışkanlık veya anlayış değişikliğini yaz."},
+  {q:"Eğer bu konuda bir ay boyunca her gün çalışırsan ne değişir?",t:"essay",hint:"Hayalini kur ama gerçekçi ol."},
+  {q:"Bugünkü oturum sırasında aklına takılan bir soru var mı?",t:"text"},
+  {q:"Şu an için en doğru adım ne?",t:"text"},
+  {q:"Bu oturumda seni en çok ne tatmin etti?",t:"text"},
+  {q:"Kendinle ilgili yeni ne fark ettin?",t:"text"},
+  {q:"Bu oturumu bir kelimeyle özetle:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 2. PİYANO
+// ─────────────────────────────────────────────────────────
+piyano:[
+  {q:"Polifoni çalışması yapıyor musun?",t:"choice",o:["Evet, Bach gibi polifonik eserler","Ara sıra","Henüz hazır değilim","Ne olduğunu tam bilmiyorum"]},
+  {q:"Legato ve staccato arasındaki farkı bugün hissettin mi?",t:"choice",o:["Evet, ikisini de bilinçle kullandım","Legato odaklıydım","Staccato odaklıydım","Farketmedim"]},
+
+  {q:"Bugün hangi eseri ya da etüdü çalıştın?",t:"text"},
+  {q:"Metronom kullandın mı?",t:"choice",o:["Evet, sürekli","Evet, ara sıra","Hayır ama denemek istiyorum","Hayır, kullanmam"]},
+  {q:"Hangi tekniğe odaklandın?",t:"choice",o:["Parmak egzersizleri","Ölçek/Gam/Arpej","Dinamikler","Pedal tekniği","Deşifre","Ezber","Çift el koordinasyonu","Pozisyon/Duruş"]},
+  {q:"Zorlandığın bir ölçüyü kaç kez tekrar ettin?",t:"choice",o:["10+ kez","5-9 kez","2-4 kez","Bir kez","Atladım"]},
+  {q:"Bu eser hakkında ne hissediyorsun?",t:"choice",o:["Çok seviyorum 🎵","Ilımlı seviyorum","Tarafsızım","Zorlu ama ilginç","Çekilmez zor"]},
+  {q:"Bugün ellerinin bağımsızlığı nasıldı?",t:"choice",o:["Mükemmel","İyi","Orta","Zayıf","Henüz çalışıyorum"]},
+  {q:"Bu eserin bestecisini ve dönemini araştırdın mı?",t:"choice",o:["Evet, derinlemesine","Evet, yüzeysel","Hayır ama biliyorum","Hayır, hiç bilmiyorum"]},
+  {q:"Bugün sesi müzikal açıdan nasıl ürettın?",t:"choice",o:["Bilinçli dinamiklerle","Otomatik/mekanik","İfadeli ama düzensiz","Daha çok teknik odaklıydım"]},
+  {q:"Bu eserin bestecisi, dönemi ve tarihsel önemi hakkında bildiklerini yaz:",t:"essay",hint:"Bestecinin yaşamı, müzikal üslubu ve bu eserin müzik tarihindeki yeri."},
+  {q:"Bu pasajda teknik olarak ne öğrendin?",t:"essay",hint:"Parmak geçişleri, el pozisyonu, bilek esnekliği gibi spesifik detaylar."},
+  {q:"Müzikal ifadeyi nasıl geliştirdin?",t:"essay",hint:"Dinamik değişimler, tempo rubato, artikülasyon tercihlerini tartış."},
+  {q:"Bir konser piyanosuyla ya da öğretmenin önünde çalıyor olsaydın ne farklı yapardın?",t:"essay",hint:"Baskı altında performans ve günlük pratik farkı."},
+  {q:"Hangi ölçekler/gamlarda en zayıf hissediyorsun?",t:"text"},
+  {q:"Bugün çaldığın parça sana ne hissettirdi?",t:"text"},
+  {q:"Bir sonraki oturumda odaklanmak istediğin tek şey:",t:"text"},
+  {q:"Pedal kullanımın müzikal ifadeye nasıl katkı sağladı?",t:"text"},
+  {q:"Ezber yaparken hangi stratejiyi kullandın?",t:"choice",o:["Tekrar tekrar çalarak","Ölçek ölçek","Parçaları birleştirerek","Dinleyerek","Nota okuyarak analiz"]},
+  {q:"Tempo çalışman nasıl gitti?",t:"choice",o:["Yavaştan hıza başarıyla ilerledi","Sabit tempoda çalıştım","Tempoyu ihmal ettim","Hep hızlı çaldım"]},
+  {q:"Bugün seni en çok zorlayan teknik unsur neydi?",t:"text"},
+  {q:"Piyano çalmanın sana hayatta öğrettiği bir şey var mı?",t:"essay",hint:"Sabır, disiplin, hata ile barışma, mükemmeliyetçilik üzerine düşün."},
+  {q:"Gelecekte çalmak istediğin eser ya da besteci:",t:"text"},
+  {q:"Ellerinin bağımsız hareket etmesi için ne çalıştın?",t:"text"},
+  {q:"Bu oturumda en güzel çaldığın an hangi andı?",t:"text"},
+  {q:"Müziği sadece not yerine duyguyla nasıl aktarabilirsin?",t:"essay",hint:"Teknik ustalık ile müzikal ifade arasındaki denge."},
+  {q:"Bugün çaldığın müziği bir renge benzetseydin ne olurdu?",t:"text"},
+  {q:"Çalma alışkanlığını oluşturmak için kullandığın stratejiler:",t:"text"},
+  {q:"Bir müzikal zorluğu aşmak için en etkili yöntemin ne olduğunu düşünüyorsun?",t:"essay",hint:"Kişisel deneyimlerin ve müzik pedagojisi perspektifinden."},
+  {q:"Bugün hangi müzikal kavramı daha iyi anladın?",t:"text"},
+  {q:"Oturumun başındaki ve sonundaki çalışın arasındaki fark:",t:"text"},
+  {q:"Piyano pratiği hayatının diğer alanlarını nasıl etkiliyor?",t:"essay",hint:"Disiplin, sabır, odak ve yaratıcılık bağlantıları."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 3. GİTAR
+// ─────────────────────────────────────────────────────────
+gitar:[
+  {q:"Bugün hangi tarz ya da eseri çalıştın?",t:"choice",o:["Klasik","Rock/Pop akord","Fingerpicking","Blues","Flamenco","Jazz","Metal riff","Kendi bestem"]},
+  {q:"Parmak uçlarının durumu nasıl?",t:"choice",o:["Tam sertleşti","İyi","Orta","Biraz acıtıyor","Çok acıtıyor"]},
+  {q:"Barre akorları nasıl gitti?",t:"choice",o:["Temiz ve rahat","İyi ama yorucu","Mücadele ettim","Henüz yapamıyorum"]},
+  {q:"Bugün hangi tekniğe odaklandın?",t:"choice",o:["Sol el parmak egzersizleri","Sağ el ritim/picking","Akor geçişleri","Melodi çalma","Solo tekniği","Ses temizliği"]},
+  {q:"Metronom ya da ritim aletli çalıştın mı?",t:"choice",o:["Evet, sürekli","Evet, ara sıra","Hayır"]},
+  {q:"Bugün öğrendiğin ya da geliştirdiğin teknik:",t:"text"},
+  {q:"Gitarı elektrik mi akustik mi çaldın ve bu tercihin neden?",t:"text"},
+  {q:"Bu egzersizin genel müzisyenliğine katkısı:",t:"essay",hint:"Ritim duygusu, müzikalite ve teknik gelişim açısından."},
+  {q:"Bir gitar solosu yazmak ya da doğaçlamak için ne eksik?",t:"essay",hint:"Teori bilgisi, teknik hazırlık, müzikal özgüven."},
+  {q:"Favori gitaristinden ne öğrenebilirsin?",t:"essay",hint:"Teknik, stil, müzikalite ve müzisyenlik anlayışı."},
+  {q:"Akor geçişlerinde hangi geçiş hâlâ zorlu?",t:"text"},
+  {q:"Bugün en iyi çaldığın kısım hangisiydi?",t:"text"},
+  {q:"Gitarın sesi bugün nasıldı?",t:"choice",o:["Temiz ve berrak","Biraz boğuk","Akord bozuktu","Mükemmeldi"]},
+  {q:"Ritim çalışması nasıl gitti?",t:"choice",o:["Groove hissettim","İyi ama mekanikti","Dengesizdi","Ritim konusunda çalışmam lazım"]},
+  {q:"Müzisyen olma yolculuğunda bugün bir adım attın mı?",t:"text"},
+  {q:"Şarkı sözleri yazıyor musun? Bugünkü müziğini sözle ifade et:",t:"text"},
+  {q:"Doğaçlama (improvisation) yaptın mı?",t:"choice",o:["Evet, keyifliydi","Kısa denedim","Hayır ama yapmak istiyorum","Henüz hazır değilim"]},
+  {q:"Gitarın sende uyandırdığı duyguyu yaz:",t:"text"},
+  {q:"Grup/band ortamında çalmayı hayal ediyorsun mu? Ne hissederdin?",t:"essay",hint:"Sosyal müzisyenlik, dinleme ve uyum."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 4. KİTAP OKUMA
+// ─────────────────────────────────────────────────────────
+kitap:[
+  {q:"Hangi kitabı okudun ve kaç sayfa?",t:"text"},
+  {q:"Kitabın türü:",t:"choice",o:["Roman","Felsefe","Bilim","Tarih","Kişisel Gelişim","Biyografi","Şiir","Psikoloji","Ekonomi","Diğer"]},
+  {q:"Okuma hızın ve konsantrasyonun nasıldı?",t:"choice",o:["Hızlı ve odaklı","Normal pace","Yavaş ama dikkatli","Çok yavaş/dikkat dağınıktı"]},
+  {q:"Bu bölümün kısa özeti (kendi cümlelerinle):",t:"essay",hint:"Ana fikir, önemli olaylar veya argümanlar."},
+  {q:"En çok hangi cümle veya paragraf seni sarstı?",t:"text"},
+  {q:"Yazarın ana tezi ya da mesajı ne?",t:"essay",hint:"Yazarın okuyucuya iletmek istediği temel fikri analiz et."},
+  {q:"Bu kitabı okurken aklına gelen bir soru:",t:"text"},
+  {q:"Kitaptaki bir karakter ya da fikri hayatınla nasıl ilişkilendirirsin?",t:"essay",hint:"Kişisel deneyim ve kitaptaki fikir arasındaki köprü."},
+  {q:"Bu kitap seni nasıl değiştiriyor?",t:"text"},
+  {q:"Bir sonraki okumada takip etmek istediğin konu ya da yazar:",t:"text"},
+  {q:"Yazarın anlatım tarzını değerlendir:",t:"choice",o:["Akıcı ve büyüleyici","Sade ve net","Karmaşık ama derin","Ağır ve sıkıcı","Eşsiz ve özgün"]},
+  {q:"Bu bölümde anlamadığın ya da kafanı karıştıran bir şey var mı?",t:"text"},
+  {q:"Kitabı birine tavsiye eder miydin? Neden?",t:"text"},
+  {q:"Bu kitaptan öğrendiğin en önemli kavram ya da fikri anlat:",t:"essay",hint:"Kavramı kendi kelimelerinle açıkla, örnekler ver."},
+  {q:"Kitabın geçtiği dönem ya da ortam seni nasıl etkiliyor?",t:"text"},
+  {q:"Okurken zihninde oluşan görsel sahne ya da his:",t:"text"},
+  {q:"Bu kitap hangi soruya cevap arıyor?",t:"essay",hint:"Yazarın sormak istediği temel soruyu bul."},
+  {q:"Kitabı okurken müzik/ses dinliyor musun? Bu odaklanmanı nasıl etkiliyor?",t:"choice",o:["Evet, yardımcı oluyor","Bazen","Hayır, sessizlik lazım","Değişiyor"]},
+  {q:"Bu kitabı bitirdikten sonra ne yapacaksın?",t:"text"},
+  {q:"Kitaptaki en güçlü argüman ve ona karşı argüman:",t:"essay",hint:"Eleştirel okuma: güçlü yönler ve zayıf noktalar."},
+  {q:"Okuduğun bölümün bir cümlelik özeti:",t:"text"},
+  {q:"Yazarın perspektifine katılıyor musun? Neden?",t:"essay",hint:"Dürüst ve eleştirel bir değerlendirme yap."},
+  {q:"Bu kitap hangi diğer kitap ya da fikirleri çağrıştırıyor?",t:"text"},
+  {q:"Okuma alışkanlığını geliştirmek için ne yapıyorsun?",t:"text"},
+  {q:"Bu kitabın seni şaşırtan bir yönü var mıydı?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 5. FELSEFE
+// ─────────────────────────────────────────────────────────
+felsefe:[
+  {q:"Kontrafaktüel (counterfactual) düşünce: bu tarihi karar farklı olsaydı?",t:"essay",hint:"Anakoronizm tuzağından kaçın. Euler'ın matematiksel ispatları gibi kesin argüman kur."},
+  {q:"'Kill your darlings' felsefede ne anlama gelir?",t:"essay",hint:"En sevdiğin argümanı eleştir. Nietzsche'nin kendi güçlü iddialarını sorgulaması gibi."},
+
+  {q:"Stoacılık nedir? Temel prensipleri neler?",t:"essay",hint:"Kontrol dichotomisi, arete, logos — Stoacılığın üç temel sütununu açıkla."},
+  {q:"Varoluşçuluk: insanın özgürlüğü ve sorumluluğu",t:"essay",hint:"Sartre ve Camus üzerinden varoluşun anlam arayışını açıkla. Kötü niyet (bad faith) kavramı."},
+  {q:"Kant'ın ahlak felsefesi: ödev etiği nedir?",t:"essay",hint:"Kategorik imperatif ve ödev etiğini gündelik bir örnekle açıkla."},
+  {q:"Heidegger'in 'Dasein' kavramı ne anlama gelir?",t:"essay",hint:"Dünyaya-atılmışlık, varoluşun zamansal yapısı, ölüme-doğru-varlık."},
+  {q:"Nietzsche'nin güç istenci ve üst-insan kavramı:",t:"essay",hint:"Nihilizmden çıkış yolu olarak değer yaratma ve kendi kendini aşma."},
+  {q:"Camus'nun saçma felsefesi nedir?",t:"essay",hint:"Sisifos efsanesi — anlamsız bir dünyada anlam aramak. İsyan mı, intikam mı?"},
+  {q:"Bu düşünürün en güçlü ispatı/argümanı:",t:"essay",hint:"Mantıksal yapıyı çöz: öncüller, geçiş adımları, sonuç."},
+
+  {q:"Hangi filozofu veya felsefi akımı çalıştın?",t:"text"},
+  {q:"Hangi alan?",t:"choice",o:["Etik","Epistemoloji","Metafizik","Mantık","Siyaset Felsefesi","Estetik","Dil Felsefesi","Din Felsefesi","Zihin Felsefesi","Doğu Felsefesi"]},
+  {q:"Bu filozofun yaşam hikayesi ve temel görüşleri:",t:"essay",hint:"Yaşadığı dönem, etkilendiği düşünürler ve ana eserleri."},
+  {q:"En güçlü argümanı kendi cümlelerinle açıkla:",t:"essay",hint:"Öncüller, akıl yürütme süreci ve sonuç."},
+  {q:"Bu fikre katılıyor musun? Neden?",t:"essay",hint:"Dürüst ve argümanlı bir değerlendirme yap."},
+  {q:"Bu felsefi fikri günlük hayatına nasıl uygulayabilirsin?",t:"essay",hint:"Somut, yaşanabilir örnekler ver."},
+  {q:"Bu akıma en güçlü itiraz nedir?",t:"essay",hint:"Karşı argümanları düşün ve değerlendir."},
+  {q:"Bu düşünür ile bugünün dünyası arasında nasıl bir köprü kurarsın?",t:"essay",hint:"Fikrin günümüzde nasıl tezahür ettiğini düşün."},
+  {q:"Bugün hangi kavramı daha iyi anladın?",t:"text"},
+  {q:"Felsefi çalışman seni nasıl değiştiriyor?",t:"text"},
+  {q:"Bu filozofu modern bir sorunla karşılaştırmak istesen hangi sorunu seçerdin?",t:"essay",hint:"Yapay zeka etiği, iklim adaleti, sosyal medya gibi."},
+  {q:"Anlamakta en çok zorlandığın kavram:",t:"text"},
+  {q:"Bu felsefi sistemin içindeki çelişki ya da zayıf nokta:",t:"essay",hint:"Sistem kendi içinde tutarlı mı? Açıklanamayan ne kalıyor?"},
+  {q:"Hangi Türk filozofu ya da düşünürü bu konuyu ele almış olabilir?",t:"text"},
+  {q:"Felsefe çalışmak hayata bakışını nasıl değiştirdi?",t:"essay",hint:"Somut bir örnek ya da kararla açıkla."},
+  {q:"Bir fikri gerçekten anladığını nasıl anlarsın?",t:"text"},
+  {q:"Bu argümanı üniversiteli birine nasıl anlatırdın?",t:"essay",hint:"Karmaşığı basitleştir ama içini boşaltma."},
+  {q:"Felsefeyle ilgilenmen hayatına nasıl katkı sağlıyor?",t:"text"},
+  {q:"Bugün okuduğun metnin en çarpıcı cümlesi:",t:"text"},
+  {q:"Farklı kültürlerin bu soruya yaklaşımı nasıl farklılaşır?",t:"essay",hint:"Batı/Doğu veya antik/modern karşılaştırması."},
+  {q:"Gerçek şu an nedir? Özgür irade var mı? Hangisi üzerine düşündün?",t:"text"},
+  {q:"Bu fikir seni rahatsız ediyor mu? Neden?",t:"essay",hint:"Felsefi rahatsızlık büyümenin işareti olabilir."},
+  {q:"Öğrendiğin kavramı bir analoji ya da metaforla anlat:",t:"text"},
+  {q:"Mantık hataları (fallacy) buldun mu? Hangisi?",t:"text"},
+  {q:"Bu akımın sanat, bilim ya da politikayla bağlantısı:",t:"essay",hint:"Felsefenin diğer alanlara sızdığı yerleri gör."},
+  {q:"Kendi felsefi pozisyonun ne?",t:"essay",hint:"Etik, bilgi veya varoluş üzerine kendi görüşünü savun."},
+  {q:"Okuduğun metin bir tartışma başlatsaydı hangi soruyu sorardın?",t:"text"},
+  {q:"Felsefe yapmanın en zevkli ve en zorlu yanı:",t:"text"},
+  {q:"Bu düşünür hata mı yaptı? Nerede?",t:"essay",hint:"Eleştirel düşünce: büyük zihinler de yanılabilir."},
+  {q:"Bugün aklında kalan tek cümle:",t:"text"},
+  {q:"İnsan doğası hakkında ne düşünüyorsun? Bu çalışma görüşünü değiştirdi mi?",t:"essay",hint:"İyimser, kötümser veya realist perspektif."},
+  {q:"Bu felsefi soruya kişisel cevabın:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 6. EGZERSİZ / SPOR
+// ─────────────────────────────────────────────────────────
+egzersiz:[
+  {q:"Setler ve tekrarlama sayıları hedeflerinle uyumlu mu?",t:"choice",o:["Evet, program takip ediyorum","Yaklaşık takip","Hayır, serbest çalışıyorum","Program yok"]},
+
+  {q:"Calisthenics (vücut ağırlığı) egzersizleri yapıyor musun?",t:"choice",o:["Evet, düzenli","Bazen","Hayır","Nedir bilmiyorum"]},
+  {q:"Bugünkü fiziksel aktivitenin yoğunluk indeksi (RPE 1-10):",t:"text"},
+
+  {q:"Antrenman türün:",t:"choice",o:["Koşu","Yürüyüş","Ağırlık","HIIT","Yoga","Yüzme","Bisiklet","Dövüş sanatı","Dans","Pilates","Fonksiyonel"]},
+  {q:"Antrenman şiddeti:",t:"choice",o:["Maksimal 🔥","Yüksek","Orta","Hafif recuperation","Rehabilitasyon"]},
+  {q:"Bugün ne kadar mesafe/süre/tekrar?",t:"text"},
+  {q:"Vücudun nasıl hissettiriyor?",t:"choice",o:["Harika, enerjik","İyi, yorgun değil","Orta, biraz ağır","Yorgun ama mutlu","Ağır ve yorgun"]},
+  {q:"Form ve tekniğini nasıl değerlendirirsin?",t:"choice",o:["Mükemmel","İyi","Orta","Dikkat etmeliydim","Formumu kaybettim"]},
+  {q:"Bugünkü antrenmanın en zorlu kısmı:",t:"text"},
+  {q:"Isınma ve soğuma yaptın mı?",t:"choice",o:["Her ikisini de yaptım","Sadece ısınma","Sadece soğuma","Hiçbirini yapmadım"]},
+  {q:"Bu hafta antrenman hedefin ne?",t:"text"},
+  {q:"Zihin-beden bağlantısını nasıl hissettin?",t:"essay",hint:"Egzersiz sırasında zihnin neredeydi? Beden sinyallerine dikkat ettin mi?"},
+  {q:"Antrenmanın uzun vadeli sağlık hedeflerine katkısı:",t:"essay",hint:"Cardiovascular sağlık, kas gelişimi, esneklik veya mental sağlık."},
+  {q:"Plato (durgunluk döneminde) misin? Nasıl aşacaksın?",t:"essay",hint:"Çeşitlendirme, yoğunluk artışı, dinlenme stratejileri."},
+  {q:"Antrenman seni psikolojik olarak nasıl etkiliyor?",t:"essay",hint:"Stres azalması, dopamin, güven, disiplin."},
+  {q:"Beslenmen antrenmanı destekliyor mu?",t:"choice",o:["Evet, titiz takip ediyorum","Büyük ölçüde evet","Orta düzeyde","Hayır, geliştirmeliyim"]},
+  {q:"Uyku kaliten antrenmanı etkiliyor mu?",t:"choice",o:["Evet, olumlu","Nötr","Uyku az olduğunda fark ediyorum","Büyük olumsuz etki"]},
+  {q:"Hangi egzersiz en çok motive ediyor?",t:"text"},
+  {q:"Sakatlık riskini azaltmak için ne yapıyorsun?",t:"text"},
+  {q:"Antrenman partnerin ya da topluluğun var mı?",t:"choice",o:["Evet, büyük motivasyon","Bazen","Hayır ama istiyorum","Yalnız çalışmayı tercih ederim"]},
+  {q:"Bugün aşmanı sağlayan iç güç neydi?",t:"text"},
+  {q:"Spor felsefeni açıkla — neden yapıyorsun?",t:"essay",hint:"Performans, sağlık, meditasyon, sosyal veya kimlik."},
+  {q:"5 yıl sonra fiziksel olarak nerede olmak istiyorsun?",t:"text"},
+  {q:"Vücudun sana ne söylüyor?",t:"text"},
+  {q:"Antrenman rutinine en son ne ekledi?",t:"text"},
+  {q:"En sevdiğin ve en sevmediğin egzersiz:",t:"text"},
+  {q:"Bugün geçmiş seninle kıyasla ilerleme var mı?",t:"text"},
+  {q:"Dinlenme (recovery) konusunda ne yapıyorsun?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 7. MATEMATİK
+// ─────────────────────────────────────────────────────────
+matematik:[
+  {q:"Bugün hangi konuyu çalıştın?",t:"text"},
+  {q:"Konu alanı:",t:"choice",o:["Temel Cebir","Lineer Ceza","Calculus/Analiz","İstatistik","Olasılık","Geometri","Sayılar Teorisi","Kombinatorik","Diferansiyel Denklemler","Lineer Cebir"]},
+  {q:"Bugün kaç problem çözdün?",t:"choice",o:["20+","10-19","5-9","1-4","Hiç çözmedim, sadece okudum"]},
+  {q:"Hata türlerin nelerdi?",t:"choice",o:["Kavram hatası","İşlem hatası","Dikkatsizlik","Süre problemi","Hata yapmadım"]},
+  {q:"Bu konuyu sıfırdan birine anlat:",t:"essay",hint:"Temel kavramlar, formüller ve adım adım uygulama."},
+  {q:"Gerçek hayattaki uygulama alanları:",t:"essay",hint:"Bu matematiğin fizik, mühendislik, finans veya günlük hayattaki kullanımı."},
+  {q:"Bu konunun en soyut ya da kavraması zor yönü:",t:"essay",hint:"Neden zor? Zihinsel engeli nasıl aşabileceğini düşün."},
+  {q:"Bir problemi farklı yollarla çözdün mü?",t:"choice",o:["Evet, 2 farklı yol","Evet, 3+ yol","Hayır, tek yol","Bilmiyorum"]},
+  {q:"Formülü ezberleme yerine neden böyle olduğunu anlıyor musun?",t:"choice",o:["Evet, tam anlıyorum","Büyük ölçüde anlıyorum","Biraz anlıyorum","Sadece ezber yapıyorum"]},
+  {q:"Bu konuyu öğrenmeni engelleyen şey:",t:"text"},
+  {q:"Matematiği güzel kılan nedir?",t:"essay",hint:"Soyutluk, kesinlik, estetik, pratik güç."},
+  {q:"Bugün en zevk aldığın problem tipi:",t:"text"},
+  {q:"Grafik, şema ya da görselleştirme kullandın mı?",t:"choice",o:["Evet, çok faydalıydı","Bazen","Hayır ama denesem iyi olur","Gerek duymadım"]},
+  {q:"Bu konu için hangi kaynakları kullanıyorsun?",t:"text"},
+  {q:"Matematiğin başka disiplinlerle bağlantısı seni heyecanlandırıyor mu?",t:"text"},
+  {q:"Bir ödev ya da sınava hazırlanıyor musun? Ne durumdasın?",t:"text"},
+  {q:"Matematiksel sezgi geliştiriyor musun? Nasıl?",t:"essay",hint:"Yavaş okuma, örüntü bulma, tahmin etme."},
+  {q:"Bu konuyu tam anladığını gösteren en zor problem:",t:"text"},
+  {q:"Sayıların, desenlerin ya da soyut yapıların estetiği seni etkiliyor mu?",t:"text"},
+  {q:"Matematiği öğrenmek için bulduğun en iyi yöntem:",t:"text"},
+  {q:"Hata yaptığında ne hissediyorsun ve nasıl devam ediyorsun?",t:"essay",hint:"Büyüme zihniyeti ve matematiksel azim."},
+  {q:"Bugünkü çalışmanın en tatmin edici anı:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 8. KODLAMA / YAZILIM
+// ─────────────────────────────────────────────────────────
+kodlama:[
+  {q:"Technical debt (teknik borç) birikiyor mu?",t:"essay",hint:"Stack Overflow gibi kaynaklardan aldığın çözümlerin uzun vadede koda etkisi. Feynman tekniğiyle kodu başkasına anlat."},
+
+  {q:"Hangi dil/framework kullandın?",t:"text"},
+  {q:"Ne üzerine çalıştın?",t:"choice",o:["Yeni özellik geliştirme","Bug fix","Algoritma pratiği","Kurs/tutorial","Proje başlatma","Refactoring","Test yazma","Mimari tasarım"]},
+  {q:"Bugün takıldığın problem ve nasıl çözdün:",t:"essay",hint:"Hata mesajı, debug süreci ve çözüm yolu."},
+  {q:"Bugün öğrendiğin kavramı kendi kelimelerinle açıkla:",t:"essay",hint:"Okuyucunun hiç bilmediğini varsay."},
+  {q:"Yazdığın kodun kalitesi hakkında dürüst bir değerlendirme:",t:"choice",o:["Temiz ve okunabilir","İşe yarıyor ama geliştirilebilir","Çalışıyor ama dağınık","Refactor lazım","Henüz çalışmıyor"]},
+  {q:"Test yazdın mı?",t:"choice",o:["Evet, kapsamlı","Evet, temel","Hayır ama yapmalıyım","Bu proje için gerek yok"]},
+  {q:"Kullandığın algoritma ya da veri yapısı:",t:"text"},
+  {q:"Bu kodu 6 ay sonra anlayabilir misin? Ne değiştirirdin?",t:"essay",hint:"Okunabilirlik, dokümantasyon ve sürdürülebilirlik."},
+  {q:"Bu problemi farklı yaklaşımla çözseydın ne olurdu?",t:"essay",hint:"Alternatif algoritmalar, farklı paradigmalar."},
+  {q:"Günümüz kütüphaneleri/framework'leri olmadan bu nasıl çözülürdü?",t:"essay",hint:"Temel bilgisayar bilimi anlayışı."},
+  {q:"Commit ya da versiyon kaydı yaptın mı?",t:"choice",o:["Evet, düzenli","Evet, ama az","Hayır","Versiyon kontrolü kullanmıyorum"]},
+  {q:"Büyük resim: bu ne işe yarıyor?",t:"text"},
+  {q:"Performans optimizasyonu düşündün mü?",t:"choice",o:["Evet, detaylı analiz","Kısmen","Hayır, önce çalışsın","Henüz erken"]},
+  {q:"Daha ileri gitmek için öğrenmem gereken şey:",t:"text"},
+  {q:"Gerçek kullanıcı perspektifinden bu kodu değerlendir:",t:"essay",hint:"UX, hata yönetimi, kenar durumlar."},
+  {q:"Open source projeye katkıda bulunmak ister misin?",t:"choice",o:["Evet, aktif yapıyorum","Evet yapmak istiyorum","Belki ileride","Hayır"]},
+  {q:"Yazılım geliştirmeyi sanat olarak görüyor musun?",t:"essay",hint:"Yaratıcılık, estetik ve problem çözme perspektifi."},
+  {q:"Bugün kod yazmanın zihinsel zorluğu nasıldı?",t:"choice",o:["Akış halindeyim","Zorlu ama keyifliydi","Zorlayıcıydı","Çok bunaltıcıydı"]},
+  {q:"Koda yorum satırı ekliyor musun?",t:"choice",o:["Evet, kapsamlı","Evet, önemli yerlere","Nadiren","Hayır"]},
+  {q:"Bir sonraki oturumda ne yapacaksın?",t:"text"},
+  {q:"Bu proje seninle ne öğretti?",t:"essay",hint:"Teknik ve kişisel öğrenimler."},
+  {q:"En çok hangi hata tipinden öğreniyorsun?",t:"text"},
+  {q:"Pair programming ya da code review yaptın mı?",t:"choice",o:["Evet","Hayır ama yararlı olur","Yalnız çalışmayı tercih ederim"]},
+  {q:"Bu proje nasıl geliştirildi?",t:"text"},
+  {q:"Bilgisayar biliminin felsefi boyutu seni düşündürdü mü?",t:"essay",hint:"Hesaplama, yapay zeka ve insan zihni paradoksu."},
+  {q:"Debuggin yaparken en etkili stratejin:",t:"text"},
+  {q:"Kodun çalışmaya başladığında ne hissediyorsun?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 9. MEDİTASYON / MİNDFULNESS
+// ─────────────────────────────────────────────────────────
+meditasyon:[
+  {q:"Body scan (beden taraması) pratiği yaptın mı?",t:"choice",o:["Evet, baştanayak","Kısmen","Hayır — farklı teknik","Bilmiyorum"]},
+  {q:"Yoga nidra veya derin gevşeme denedin mi?",t:"choice",o:["Evet, çok derin bir deneyimdi","Evet ama uykuya daldım","Hayır","Ne olduğunu bilmiyorum"]},
+
+  {q:"Hangi tekniği kullandın?",t:"choice",o:["Nefes odaklı (Vipassana)","Beden taraması","Görselleştirme","Loving-kindness (Metta)","Sessiz oturma (Zazen)","Yürüyüş meditasyonu","Mantra","Kılavuzlu meditasyon"]},
+  {q:"Zihnin ne kadar sakin?",t:"choice",o:["Derin sessizlik 🌊","Sakin","Orta — düşünceler gelip geçti","Hareketliydi","Çok dağınıktı"]},
+  {q:"Ortamın nasıldı?",t:"choice",o:["Sessiz ve ideal","İyi ama bazı sesler vardı","Biraz gürültülüydü","Gürültülüydü"]},
+  {q:"Bedenden gelen sinyaller (ağrı, gerginlik, rahatlama):",t:"text"},
+  {q:"Bu seansın kısa özeti:",t:"essay",hint:"Ortaya çıkan düşünceler, duygular ve deneyimler."},
+  {q:"Meditasyonun günlük yaşamına somut bir katkısı var mı?",t:"essay",hint:"Tepkisellik azalması, odak artışı, uyku kalitesi."},
+  {q:"Derinleşmek için ne deneyebilirsin?",t:"essay",hint:"Süre artışı, farklı teknik, rehber."},
+  {q:"Meditasyon sırasında en çok hangi tür düşünce geliyor?",t:"choice",o:["Geçmiş pişmanlıklar","Gelecek kaygılar","Günlük to-do listesi","Yaratıcı fikirler","Boş/anlamsız","Çeşitli"]},
+  {q:"Nefes gözlemine odaklandığında ne fark ettin?",t:"text"},
+  {q:"Bugün kendinle nasıl barıştın?",t:"text"},
+  {q:"Meditasyon pratiğin düzenli mi?",t:"choice",o:["Evet, her gün","Haftada 4-5 gün","Haftada 2-3 gün","Düzensiz","Yeni başlıyorum"]},
+  {q:"Ego ya da benlik kavramı üzerine ne düşündün?",t:"essay",hint:"Benlik illüzyonu, farkındalık ve varoluş."},
+  {q:"Meditasyon sırasında ortaya çıkan en önemli içgörü:",t:"text"},
+  {q:"Beden-zihin-ruh bütünlüğünü nasıl hissediyorsun?",t:"essay",hint:"Üçünün birbirine nasıl etki ettiğini gözlemle."},
+  {q:"Gelecek seans için niyetini yaz:",t:"text"},
+  {q:"Farkındalık (mindfulness) günün hangi anında en çok işe yarıyor?",t:"text"},
+  {q:"Meditasyon yolculuğunu anlat — nasıl başladın?",t:"text"},
+  {q:"Şimdiki anın gücü sana ne öğretti?",t:"essay",hint:"Geçmiş ve geleceğe kıyasla şimdinin değeri."},
+  {q:"Acıyı ya da zorluğu gözlemlemek nasıl bir deneyim?",t:"essay",hint:"Duygularla savaşmak yerine onları gözlemlemek."},
+  {q:"Suskunluk sana ne söylüyor?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 10. DİL ÖĞRENIMI
+// ─────────────────────────────────────────────────────────
+dil:[
+  {q:"Flashcard veya Anki kartları kullanıyor musun?",t:"choice",o:["Evet, Anki","Evet, farklı uygulama","Hayır ama başlayacağım","Hayır, tercih etmiyorum"]},
+  {q:"Body language ve kültürel farkları araştırdın mı?",t:"text"},
+
+  {q:"Hangi dili ve hangi konuyu çalıştın?",t:"text"},
+  {q:"Dil seviyenin nerede olduğunu tahmin ediyorsun?",t:"choice",o:["A1 Başlangıç","A2 Temel","B1 Orta","B2 Üst Orta","C1 İleri","C2 Akıcı"]},
+  {q:"Bugünkü çalışma odak alanı:",t:"choice",o:["Kelime bilgisi","Gramer","Dinleme","Konuşma","Okuma","Yazma","Telaffuz","Kültürel içerik"]},
+  {q:"Kaç yeni kelime öğrendin veya pekiştirdin?",t:"choice",o:["20+","10-19","5-9","1-4","Kelimeden çok gramer"]},
+  {q:"Bugün öğrendiğin en ilginç ifade ya da kelime:",t:"text"},
+  {q:"Bu dilin kültürüyle bağlantı kurabildin mi?",t:"choice",o:["Evet, film/müzik/edebiyat","Biraz","Sadece dili çalıştım","İlerde bağlantı kurmak istiyorum"]},
+  {q:"Ana diliyle bu dil arasındaki yapısal fark seni ne düşündürdü?",t:"essay",hint:"Dil yapısı, düşünce biçimi ve kültür ilişkisi."},
+  {q:"Bu dilde kendi kendine düşünebiliyor musun?",t:"choice",o:["Evet, sık sık","Bazen","Nadiren","Henüz değil"]},
+  {q:"Hedef dilinde bir günlük veya kısa metin yaz:",t:"essay",hint:"Bugün ne yaptın? Hedef dilde yaz, hata olsa da."},
+  {q:"Dil öğrenmenin en keyifli ve en sıkıcı kısmı:",t:"text"},
+  {q:"Bu dili konuşan biriyle pratik yapma fırsatın var mı?",t:"choice",o:["Evet, düzenli","Evet, ara sıra","Hayır ama arıyorum","Hayır ve aramıyorum"]},
+  {q:"Fonetik ya da telaffuz çalışması yaptın mı?",t:"choice",o:["Evet, ağırlıklı olarak","Biraz","Hayır"]},
+  {q:"Anki veya spaced repetition kullanıyor musun?",t:"choice",o:["Evet, günlük","Evet, düzensiz","Hayır ama kullanmalıyım","Başka yöntem kullanıyorum"]},
+  {q:"Immersion (tam daldırma) yapıyor musun?",t:"choice",o:["Evet, bu dilde içerik tüketiyorum","Bazen","Hayır","Ne olduğunu bilmiyorum"]},
+  {q:"Bu dili öğrenme motivasyonun:",t:"text"},
+  {q:"B2 seviyesine ulaştığında ne yapacaksın?",t:"text"},
+  {q:"Dil öğrenmek düşünce biçimini değiştiriyor mu?",t:"essay",hint:"Sapir-Whorf hipotezi: dil düşünceyi şekillendirir mi?"},
+  {q:"Bugünkü en büyük zorluk:",t:"text"},
+  {q:"Bu dilin müziği ya da sinemasından etkilendin mi?",t:"text"},
+  {q:"Akıcılık için hâlâ eksik olan şey:",t:"text"},
+  {q:"Çevrimiçi mi yoksa yüz yüze mi öğreniyorsun?",t:"choice",o:["Çevrimiçi","Yüz yüze sınıf","Kendi kendime","Karma"]},
+  {q:"Bugünkü oturumdan sonra yabancı dil öğrenme hakkındaki düşüncen:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 11. YAZARLIK / YARATICI YAZMA
+// ─────────────────────────────────────────────────────────
+yazarlik:[
+  {q:"Ne yazdın?",t:"choice",o:["Roman/hikaye","Deneme","Şiir","Blog yazısı","Senaryo","Günlük","Makale","Kurgusal olmayan"]},
+  {q:"Bugün kaç kelime yazdın?",t:"choice",o:["1000+","500-999","200-499","50-199","50'den az"]},
+  {q:"Yazma akışın nasıldı?",t:"choice",o:["Akış halindeyim 🌊","İyi tempo","Orta","Yavaş ve zorlayıcı","Boş sayfa sendromu"]},
+  {q:"Bugün en iyi yazdığın paragraf ya da cümle:",t:"text"},
+  {q:"Yazmanı engelleyen iç ses ya da korku:",t:"essay",hint:"Mükemmeliyetçilik, özgünlük kaygısı, yeterlilik şüphesi."},
+  {q:"Kimin için yazıyorsun?",t:"choice",o:["Kendim için","Belirli bir okuyucu için","Herkese","Henüz bilmiyorum"]},
+  {q:"Bugünkü yazının teması ya da sorusu ne?",t:"text"},
+  {q:"Yazdığın parçanın en güçlü ve en zayıf yanı:",t:"essay",hint:"Dürüst bir öz değerlendirme yap."},
+  {q:"Bir karakter ya da fikri nasıl canlandırdın?",t:"essay",hint:"Detay, diyalog, duygu ve özgünlük."},
+  {q:"Bu konuya neden yazıyorsun?",t:"essay",hint:"Kişisel bağlantı, toplumsal anlam ya da sanatsal dürtü."},
+  {q:"Bugün en çok hangi yazardan ilham aldın?",t:"text"},
+  {q:"Yazmanın düşünmeye etkisi nasıl?",t:"essay",hint:"Yazarken fikirler nasıl şekilleniyor?"},
+  {q:"Bir sonraki bölüm ya da paragrafta ne gelecek?",t:"text"},
+  {q:"Bu parçayı yayınlamak ister misin?",t:"choice",o:["Evet, kesinlikle","Belki ileride","Hayır, sadece benim için","Bitmeden düşünmüyorum"]},
+  {q:"Okuyucunun bu metinden ne hissetmesini istiyorsun?",t:"text"},
+  {q:"Bugün keşfettiğin yeni kelime ya da ifade:",t:"text"},
+  {q:"Yazmanın sana öğrettiği en büyük şey:",t:"essay",hint:"Sabır, özgünlük, empati."},
+  {q:"Yaratıcı blokla karşılaştında ne yapıyorsun?",t:"text"},
+  {q:"Bugünkü yazıyı 10 yıl sonra okursan ne hissedersin?",t:"text"},
+  {q:"Kurgusal bir karakter yarat ve onu tek cümleyle tanıt:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 12. BİLİM (fizik, kimya, biyoloji, astronomi...)
+// ─────────────────────────────────────────────────────────
+bilim:[
+  {q:"Hangi alanı çalıştın?",t:"choice",o:["Fizik","Kimya","Biyoloji","Astronomi","Nörobilim","Genetik","Kuantum mekaniği","Termodinamik","Ekoloji","Diğer"]},
+  {q:"Bugün incelediğin temel kavram ya da olgu:",t:"text"},
+  {q:"Bu kavramı sıfırdan anlat:",t:"essay",hint:"Temel tanım, mekanizma ve örnekler."},
+  {q:"Bu olgunun doğada ya da teknolojide uygulaması:",t:"essay",hint:"Soyut kavramı somut bir örnekle bağla."},
+  {q:"Bugün okuduğun metnin ana iddiası ve kanıtı:",t:"essay",hint:"Bilimsel akıl yürütme: hipotez, veri, sonuç."},
+  {q:"Bu alanda neyi hâlâ anlamıyorsun?",t:"text"},
+  {q:"Bilimsel yöntemin hangi adımı bu konuya uygulandı?",t:"choice",o:["Gözlem","Hipotez","Deney tasarımı","Veri analizi","Sonuç çıkarma","Replikasyon"]},
+  {q:"Bu bilgi nasıl keşfedildi? Tarihi süreci:",t:"essay",hint:"Bilimsel devrimler, paradigma kırılmaları."},
+  {q:"Günlük hayatında bu bilginin bir yansıması:",t:"text"},
+  {q:"Bilim ve etik arasındaki gerilim bu alanda nasıl tezahür ediyor?",t:"essay",hint:"Genetik mühendislik, nükleer enerji, yapay zeka."},
+  {q:"Bu konuda en heyecanlandığın şey:",t:"text"},
+  {q:"Hangi bilim insanını ilham verici buluyorsun?",t:"text"},
+  {q:"Evreni anlamak neden önemli?",t:"essay",hint:"Merak, anlam arayışı ve insan doğası."},
+  {q:"Bu konuya dair yanlış anlaşılan bir şey:",t:"text"},
+  {q:"Bilim sana dünyanın güzelliğini gösteriyor mu?",t:"essay",hint:"Fizik veya biyolojinin estetik boyutu."},
+  {q:"Bugünkü çalışmada gözlemcilik, analiz ya da sentez mi yaptın?",t:"text"},
+  {q:"Bu alanın gelecek 20 yılda nasıl değişeceğini tahmin ediyorsun?",t:"essay",hint:"Teknolojik ivme ve bilimsel sınırlar."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 13. TARİH
+// ─────────────────────────────────────────────────────────
+tarih:[
+  {q:"Hangi dönemi ya da olayı çalıştın?",t:"text"},
+  {q:"Coğrafya ve zaman dilimi:",t:"choice",o:["Antik Çağ","Ortaçağ","Yeni Çağ","Modern Çağ (19.yy)","20. Yüzyıl","21. Yüzyıl","Osmanlı Tarihi","Türkiye Cumhuriyeti","Dünya Savaşları","Diğer"]},
+  {q:"Bu olayın temel nedenleri:",t:"essay",hint:"Yakın nedenler, uzak nedenler ve yapısal faktörler."},
+  {q:"Bu dönemden günümüze kalan miras:",t:"essay",hint:"Kurumlar, değerler, sınırlar veya kültürel izler."},
+  {q:"Farklı tarafların bakış açıları:",t:"essay",hint:"Tarih tek sesli değil — kazananlar, kaybedenler, sessizler."},
+  {q:"Bu olayın seni en çok şaşırtan yönü:",t:"text"},
+  {q:"Tarihin tekerrür ettiğini hissettiren bir paralellik:",t:"essay",hint:"Günümüzdeki benzer örüntü ya da hata."},
+  {q:"Bu dönemde yaşasaydın ne yapardın?",t:"essay",hint:"Tarihsel empati ve karar alma."},
+  {q:"Resmi tarih anlatısında gözden kaçırılan ne var?",t:"essay",hint:"Sessizleştirilen sesler, revize edilen anlatılar."},
+  {q:"Kullandığın kaynakların güvenilirliği:",t:"choice",o:["Birincil kaynak","Akademik ikincil kaynak","Popüler tarih","Çeşitli mix","Belirsiz/genel"]},
+  {q:"Bu konuda en çok hangi soruyu sormak istiyorsun?",t:"text"},
+  {q:"Tarih yazımı taraflı mı? Bu konuda ne düşünüyorsun?",t:"essay",hint:"Tarihçinin perspektifi, ideoloji ve hakikat."},
+  {q:"Bu dönemi anlayan biri olarak hangi yanlışlığı düzeltendin?",t:"text"},
+  {q:"Tarihi anlayışın hayatında bir karar ya da görüşü nasıl etkiledi?",t:"text"},
+  {q:"Bu dönemin sanat, edebiyat veya müziğiyle bağlantısı:",t:"text"},
+  {q:"Tarih öğrenmek sana ne kazandırıyor?",t:"essay",hint:"Eleştirel düşünce, empati, bağlam."},
+  {q:"Bugün öğrendiğin en çarpıcı gerçek:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 14. SANAT / TASARIM / ÇİZİM
+// ─────────────────────────────────────────────────────────
+sanat:[
+  {q:"Suluboya mı yoksa dijital mi çalışıyorsun?",t:"choice",o:["Suluboya","Yağlıboya","Dijital","Karakalem","Pastel","Diğer"]},
+  {q:"Bugün pastel veya farklı bir malzeme denedin mi?",t:"text"},
+
+  {q:"Bugün ne yaptın?",t:"choice",o:["Resim/boyama","Çizim/sketch","Dijital illüstrasyon","Heykel","Grafik tasarım","Fotoğraf","Video/motion","Tipografi","Diğer"]},
+  {q:"Kullandığın araç/medium:",t:"text"},
+  {q:"Bu çalışmanın konusu ya da teması:",t:"text"},
+  {q:"Teknik açıdan neyi denemeye çalıştın?",t:"text"},
+  {q:"Bu çalışmada seni en çok zorlayan şey:",t:"text"},
+  {q:"Referans kullandın mı?",t:"choice",o:["Evet, gerçek hayattan","Evet, başka bir eserden","Hayır, hayal gücüm","Karma"]},
+  {q:"Bu eserin iletmek istediği duygu ya da fikir:",t:"essay",hint:"Sanatın içerik ile biçim arasındaki diyaloğu."},
+  {q:"Sanat tarihinde benzer bir eser ya da akım bulabilir misin?",t:"essay",hint:"Bağlamı yerleştir: hangi akım, kim etkiledi?"},
+  {q:"Kendi sanat tarzını nasıl tanımlarsın?",t:"essay",hint:"Etkiler, tercihler ve özgün katkı."},
+  {q:"Bu çalışmada tatmin olmadığın nokta:",t:"text"},
+  {q:"Eserini bir başkasına gösterirsen ne düşünmelerini isterdin?",t:"text"},
+  {q:"Sanat yapmanın zihinsel sağlığına katkısı:",t:"essay",hint:"Terapi, ifade özgürlüğü, akış hali."},
+  {q:"Bugün gözlem yaparak ne öğrendin?",t:"text"},
+  {q:"Kompozisyon, renk ya da ışık konusunda ne denedin?",t:"text"},
+  {q:"Bu tarzı geliştirmek için ne gerekiyor?",t:"text"},
+  {q:"İlham nereden geldi?",t:"text"},
+  {q:"Sanatın toplumsal rolü hakkında ne düşünüyorsun?",t:"essay",hint:"Güzellik, protest, iyileştirme veya yansıtma."},
+  {q:"Bugün akış (flow) yaşadın mı?",t:"choice",o:["Evet, tamamen daldım","Biraz","Hayır, mücadele ettim"]},
+  {q:"Gelecek çalışmanda denemek istediğin şey:",t:"text"},
+  {q:"Bu eserini ne zaman tamamlanmış sayacaksın?",t:"text"},
+  {q:"Sanat ve teknoloji kesişiminde seni heyecanlandıran şey:",t:"text"},
+  {q:"Bu çalışmadan önce ve sonra nasıl hissediyorsun?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 15. GİRİŞİMCİLİK / KARİYER / STRATEJİ
+// ─────────────────────────────────────────────────────────
+girisim:[
+  {q:"Product-market fit var mı? Kullanıcılar ürününü gerçekten istiyor mu?",t:"essay",hint:"Pivot zamanı mı yoksa devam mı? Kanıtın ne?"},
+
+  {q:"Bugün hangi proje ya da görev üzerinde çalıştın?",t:"text"},
+  {q:"Odak alanı:",t:"choice",o:["Ürün geliştirme","Pazarlama/büyüme","Satış","Müşteri araştırması","Finansal planlama","Takım yönetimi","Strateji","Networking","İçerik üretimi"]},
+  {q:"Bugün en değerli içgörün:",t:"text"},
+  {q:"Bir sonraki en kritik adım:",t:"text"},
+  {q:"Karşılaştığın en büyük engel ve nasıl aştın:",t:"essay",hint:"Problem, alternatifler ve karar süreci."},
+  {q:"Hedef kitlenin kim? Bugün daha iyi anladın mı?",t:"essay",hint:"Empati haritası, acı noktaları ve motivasyonlar."},
+  {q:"Rakiplerden nasıl farklılaşıyorsun?",t:"essay",hint:"Değer önerisi ve sürdürülebilir avantaj."},
+  {q:"Bugün aldığın en önemli karar:",t:"text"},
+  {q:"Eğer kaynakların sonsuz olsaydı ne yapardın?",t:"essay",hint:"Kısıtları bir kenara bırak, vizyonu gör."},
+  {q:"Bugün kimden ne öğrendin?",t:"text"},
+  {q:"Başarısızlık ya da geri dönüş (pivot) gerekiyor mu?",t:"choice",o:["Hayır, yoldayız","Küçük düzeltme lazım","Orta ölçekli değişim","Büyük pivot düşünüyorum","Henüz belli değil"]},
+  {q:"Müşteri geri bildirimine göre ne değiştirmen gerekiyor?",t:"essay",hint:"Gerçek kullanıcı sesi ve ürün-pazar uyumu."},
+  {q:"Liderlik tarzın bu projede nasıl gelişiyor?",t:"essay",hint:"Delegasyon, vizyon ve iletişim."},
+  {q:"Sürdürülebilirlik ve etik değerler projenin neresinde duruyor?",t:"essay",hint:"Uzun vadeli değer ve toplumsal sorumluluk."},
+  {q:"Bugünkü çalışmanın 1 yıl sonraki sana katkısı:",t:"text"},
+  {q:"En çok hangi konuda destek/mentörlük gerekiyor?",t:"text"},
+  {q:"Neyi bırakmak ya da basitleştirmek lazım?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 16. SAĞLIK / BESLENME / UYKU
+// ─────────────────────────────────────────────────────────
+saglik:[
+  {q:"Makrobesin (protein/karbonhidrat/yağ) dengeni nasıl?",t:"text"},
+  {q:"Kardiyovasküler sağlığın için bu hafta ne yaptın?",t:"choice",o:["Koşu/yürüyüş","Bisiklet/yüzme","Düşük yoğunluklu kardio","Hiçbir şey","Sağlık sorunum var"]},
+  {q:"Kontrol grubu gibi düşün: stres azaltma tekniğin işe yarıyor mu?",t:"essay",hint:"Hipotez kur, test et, sonuç değerlendir."},
+
+  {q:"Bugün sağlık odağın:",t:"choice",o:["Beslenme","Uyku optimizasyonu","Stres yönetimi","Sağlıklı alışkanlık","Su tüketimi","Dijital detoks","Sosyal sağlık","Kronik sorun takibi"]},
+  {q:"Bugün su tüketimin:",t:"choice",o:["2L+","1.5-2L","1-1.5L","1L'den az","Takip etmedim"]},
+  {q:"Uyku kaliten:",t:"choice",o:["Çok iyi — dinç uyandım","İyi","Orta","Kötü — yorgun uyandım","Çok kötü"]},
+  {q:"Beslenmen bugün nasıldı?",t:"choice",o:["Çok sağlıklı","Büyük ölçüde sağlıklı","Orta","Kötü","Hiç dikkat etmedim"]},
+  {q:"Stres seviyeni değerlendir (1-10):",t:"choice",o:["1-2 (çok düşük)","3-4","5-6 (orta)","7-8","9-10 (çok yüksek)"]},
+  {q:"Bugün bedeninle nasıl bağlantı kurdun?",t:"essay",hint:"Nefes farkındalığı, beden taraması, hareket."},
+  {q:"Sağlıklı alışkanlık değişikliğinde ne dene etki ediyor?",t:"essay",hint:"Çevre tasarımı, alışkanlık yığma, kimlik."},
+  {q:"Dijital ekran süren ve etkisi:",t:"text"},
+  {q:"Sosyal bağlantıların sağlığı nasıl etkiliyor?",t:"essay",hint:"Yalnızlık, destek ve anlamlı ilişkiler."},
+  {q:"Zihinsel yükü hafifletmek için ne yapıyorsun?",t:"text"},
+  {q:"Bugün doğayla bağlantı kurdun mu?",t:"choice",o:["Evet, dışarıda zaman geçirdim","Kısmen","Hayır","Şehirde doğa yok"]},
+  {q:"Sağlık hedeflerine ne kadar yakınsın?",t:"text"},
+  {q:"Önümüzdeki hafta için bir sağlık niyeti:",t:"text"},
+  {q:"Sağlıklı yaşam seni en çok hangi alanda zorluyor?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 17. OKUMA (genel — kitap + makale + araştırma)
+// ─────────────────────────────────────────────────────────
+okuma:[
+  {q:"Ne okudun? (kitap, makale, blog...)",t:"text"},
+  {q:"Okuma türün:",t:"choice",o:["Derin okuma","Tarama/skimming","Araştırma amaçlı","Keyif okuma","Referans taraması"]},
+  {q:"Ana mesaj ya da argüman:",t:"essay",hint:"Tek paragrafta özetle."},
+  {q:"Katıldığın ve katılmadığın nokta:",t:"essay",hint:"Aktif okuma: tartış, sorgula, yargıla."},
+  {q:"Bu okuma neyi değiştirdi ya da pekiştirdi?",t:"text"},
+  {q:"İlerleyen günlerde araştırmak istediğin konu:",t:"text"},
+  {q:"En değerli bölümü ya da sayfası:",t:"text"},
+  {q:"Bu içeriği bir arkadaşa nasıl özetlerdin?",t:"essay",hint:"Protégé etkisi: öğretmeyi düşünmek anlayışı derinleştirir."},
+  {q:"Bu okuma fikirlerin dünyasını nasıl genişletti?",t:"text"},
+  {q:"Alıntılamak istediğin cümle:",t:"text"},
+  {q:"Kaynağın güvenilirliğini nasıl değerlendiriyorsun?",t:"choice",o:["Çok güvenilir","Güvenilir","Orta düzeyde güvenilir","Şüpheli","Değerlendiremedim"]},
+],
+
+// ─────────────────────────────────────────────────────────
+// 18. LİDERLİK / KİŞİSEL GELİŞİM
+// ─────────────────────────────────────────────────────────
+liderlik:[
+  {q:"Bu oturum hangi liderlik becerisini geliştirdi?",t:"choice",o:["İletişim","Empati","Karar alma","Vizyon kurma","Delegasyon","Çatışma yönetimi","Takım motivasyonu","Öz-liderlik"]},
+  {q:"Bugün insanlara nasıl davrandın?",t:"text"},
+  {q:"Zor bir karar vermek zorunda kaldın mı?",t:"choice",o:["Evet, zor ama verdim","Evet, erteledim","Hayır","Gelecek için hazırlandım"]},
+  {q:"Lider olmanın en ağır yükü nedir sana göre?",t:"essay",hint:"Sorumluluk, yalnızlık, baskı."},
+  {q:"Bugün kendinle dürüst olabildin mi?",t:"text"},
+  {q:"Bir zayıflığınla yüzleştin mi? Ne yaptın?",t:"essay",hint:"Öz farkındalık ve büyüme."},
+  {q:"Etkilediğin bir kişi için ne yaptın?",t:"text"},
+  {q:"İdeal lider kimdir? Bugün ona ne kadar yakınsın?",t:"essay",hint:"Değerler, davranışlar ve boşluk analizi."},
+  {q:"Dinleme becerin bugün nasıldı?",t:"choice",o:["Gerçekten dinledim","İyi dinledim","Orta","Sık sık aklım başka yerdeydi"]},
+  {q:"Bugün ne için teşekkür edebileceğini fark ettin?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 19. REFLEKSİYON / GÜNLÜK
+// ─────────────────────────────────────────────────────────
+refleksiyon:[
+  {q:"Bugün gerçekten iyi giden şey:",t:"text"},
+  {q:"Bugün zorlu olan şey:",t:"text"},
+  {q:"Bu zorluktan ne öğrendin?",t:"essay",hint:"Her zorluk bir ders içerir."},
+  {q:"Bugün en çok kime ya da neye minnettar olduğun:",t:"text"},
+  {q:"Yarın için niyetin:",t:"text"},
+  {q:"Şu an en çok neye ihtiyacın var?",t:"choice",o:["Dinlenme","Bağlantı","Hareket","Sessizlik","İlham","Netlik","Eğlence"]},
+  {q:"Bugün gerçekten kendini ifade edebildin mi?",t:"text"},
+  {q:"Değerlerinle uyumlu yaşadın mı?",t:"choice",o:["Evet, tam uyumlu","Büyük ölçüde","Orta","Hayır, değildi","Değerlerimi sorguluyorum"]},
+  {q:"Nasıl anımsanmak istiyorsun?",t:"essay",hint:"Kısa ve uzun vadeli miras."},
+  {q:"Bu anda en büyük korkun:",t:"text"},
+  {q:"Bu anda en büyük cesaretlendiren şey:",t:"text"},
+  {q:"10 yıl sonra bugüne bakarak ne söylerdin?",t:"essay",hint:"Gelecekteki perspektif."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 20. NÖROBİLİM / PSİKOLOJİ (birleşik)
+// ─────────────────────────────────────────────────────────
+psikoloji:[
+  {q:"Hangi psikolojik kavramı ya da araştırmayı inceledi?",t:"text"},
+  {q:"Alan:",t:"choice",o:["Bilişsel Psikoloji","Sosyal Psikoloji","Gelişim Psikolojisi","Nörobilim","Davranışçılık","Pozitif Psikoloji","Klinik Psikoloji","Psikanaliz","Evrimsel Psikoloji"]},
+  {q:"Bu araştırma ya da kavramın ana bulgusu:",t:"essay",hint:"Hipotez, metodoloji, sonuç ve yorumlama."},
+  {q:"Kendi hayatında bu kavramın yansıması:",t:"essay",hint:"Bilişsel ön yargı, bellek, motivasyon..."},
+  {q:"Bu bilgiyi günlük hayatında nasıl uygularsın?",t:"essay",hint:"Somut davranış değişikliği."},
+  {q:"Bu araştırmanın sınırlılıkları ya da eleştiriler:",t:"essay",hint:"Metodoloji, genelleştirme, kültürel bağlam."},
+  {q:"Zihnin nasıl çalıştığına dair yeni bir anlayış:",t:"text"},
+  {q:"Bu konuyu başkasına aktarmak için hangi analoji kullanırsın?",t:"text"},
+  {q:"Psikoloji öğrenmek kendinle ilişkini nasıl değiştiriyor?",t:"essay",hint:"Öz anlayış ve öz şefkat."},
+  {q:"Zihin-beyin ilişkisi konusundaki görüşün:",t:"essay",hint:"İndirgemecilik, bütüncül yaklaşım."},
+  {q:"Bu hafta fark ettiğin bir bilişsel yanlılık:",t:"text"},
+  {q:"Psikoloji ile felsefenin kesiştiği bir nokta:",t:"text"},
+  {q:"Bilinçdışı süreçler davranışı ne kadar şekillendiriyor?",t:"essay",hint:"Freud, modern bilişsel bilim ve kanıt."},
+  {q:"Duygusal zeka hakkında bugün ne öğrendin?",t:"text"},
+  {q:"Bu araştırmayı toplumsal ölçekte uygulayabilir miyiz?",t:"essay",hint:"Politika, eğitim veya sağlık uygulamaları."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 21. EKONOMİ / FİNANS
+// ─────────────────────────────────────────────────────────
+ekonomi:[
+  {q:"Hangi ekonomik kavramı ya da konuyu çalıştın?",t:"text"},
+  {q:"Alan:",t:"choice",o:["Mikro Ekonomi","Makro Ekonomi","Davranışsal Ekonomi","Kalkınma Ekonomisi","Finansal Piyasalar","Kişisel Finans","Girişim Ekonomisi","Uluslararası Ekonomi"]},
+  {q:"Bu kavramı basitçe anlat:",t:"essay",hint:"Temel mantık, model ve gerçek dünya örneği."},
+  {q:"Günlük hayatında bu ekonomik prensip nerede görünüyor?",t:"essay",hint:"Fiyatlandırma, teşvik, kaynak dağılımı."},
+  {q:"Bu ekonomik modelin varsayımları ve gerçeklik farkı:",t:"essay",hint:"Modeller basitleştirir — ne kaçırıyorlar?"},
+  {q:"Bu bilgi kişisel finansal kararlarını nasıl etkiliyor?",t:"essay",hint:"Tasarruf, yatırım, harcama alışkanlıkları."},
+  {q:"Ekonomi ve etik kesişimi bu konuda nasıl görünüyor?",t:"essay",hint:"Adalet, eşitsizlik, sürdürülebilirlik."},
+  {q:"Bu konuda şüpheci ya da eleştirel olduğun nokta:",t:"text"},
+  {q:"Serbest piyasa ile devlet müdahalesi arasındaki dengeye bakışın:",t:"essay",hint:"İdeoloji değil, kanıt bazlı değerlendirme."},
+  {q:"Bugün öğrendiğin en ilginç bulgu ya da gerçek:",t:"text"},
+  {q:"Bu ekonomik trendin 10 yıl sonraki etkisi:",t:"text"},
+  {q:"Ekonomik okuryazarlık neden herkes için önemli?",t:"essay",hint:"Demokrasi, birey ve toplum."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 22. SATRANÇ / STRATEJİ OYUNLARI
+// ─────────────────────────────────────────────────────────
+satranc:[
+  {q:"Bugün ne kadar oyun oynadın?",t:"choice",o:["5+","3-4","1-2","Sadece analiz/taktik","Sadece endgame çalışması"]},
+  {q:"Çalıştığın açılış:",t:"text"},
+  {q:"Bugünkü en önemli taktik motif:",t:"choice",o:["Çatal","İğne","Köstek","Keşfedilen saldırı","Kurban","Pozisyonel baskı","Piyonlar"]},
+  {q:"Hatalı oynadığın an ve nedeni:",t:"essay",hint:"Zaman baskısı, plan yokluğu, taktik gözden kaçırma."},
+  {q:"Bir satranç partisini hayatın bir kararıyla ilişkilendirirsen:",t:"essay",hint:"Strateji, sabır ve esneklik."},
+  {q:"Endgame tekniğin nasıl?",t:"choice",o:["Güçlü","İyi","Orta","Zayıf — çalışmalıyım"]},
+  {q:"Bugün hangi büyük ustanın oyununu analiz ettin?",t:"text"},
+  {q:"Satranç sana problem çözme hakkında ne öğretti?",t:"essay",hint:"Alternatif düşünme, pozisyon değerlendirme, sabır."},
+  {q:"Rakibini okuma becerin nasıl gelişiyor?",t:"text"},
+  {q:"Satranç dışında stratejik düşünme alışkanlığın var mı?",t:"essay",hint:"İş, ilişki, kariyer kararları."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 23. FOTOĞRAFÇILIK / VİDEO
+// ─────────────────────────────────────────────────────────
+fotograf:[
+  {q:"Ne tür çekim yaptın?",t:"choice",o:["Portre","Manzara","Sokak","Ürün/still life","Mimari","Makro","Spor/hareket","Gece/uzun poz","Video/short film"]},
+  {q:"Kullandığın ekipman:",t:"text"},
+  {q:"Kompozisyon kurallarından hangisini bilinçli uyguladın?",t:"choice",o:["Üçte iki kuralı","Altın oran","Öncü çizgiler","Çerçeveleme","Negatif alan","Simetri","Dolu/boş denge"]},
+  {q:"Işık durumu ve bu ışıkla nasıl çalıştın:",t:"text"},
+  {q:"En tatmin edici kare ve teknik nedeni:",t:"essay",hint:"Işık, kompozisyon, an, teknik."},
+  {q:"Post-prodüksiyon (düzenleme) yaptın mı?",t:"choice",o:["Evet, kapsamlı","Minimal düzeltme","Hayır","RAW çekimdeyim henüz"]},
+  {q:"Bu çekimde anlatmak istediğin hikaye ya da duygu:",t:"essay",hint:"Fotoğraf sadece teknik değil — anlam taşıyor."},
+  {q:"Teknik sınırlılıkların yaratıcılığını nasıl etkiledi?",t:"essay",hint:"Kısıt = odak = sanat."},
+  {q:"Favori fotoğrafçıdan bu çekime uyguladığın ilham:",t:"text"},
+  {q:"Fotoğrafçılık bakış açını hayatın genelinde nasıl değiştiriyor?",t:"essay",hint:"Gözlem, an, güzellik farkındalığı."},
+],
+
+// ─────────────────────────────────────────────────────────
+// 24. YAPAY ZEKA / VERİ BİLİMİ
+// ─────────────────────────────────────────────────────────
+yapay_zeka:[
+  {q:"Bugün hangi AI konusunu ya da projesini çalıştın?",t:"text"},
+  {q:"Alan:",t:"choice",o:["Makine öğrenmesi","Derin öğrenme","NLP","Bilgisayarlı görü","Takviyeli öğrenme","Veri analizi","Etik AI","LLM/GPT","Görüntü üretme","Diğer"]},
+  {q:"Temel kavramı açıkla:",t:"essay",hint:"Model, eğitim, tahmin sürecini kendi kelimelerinle."},
+  {q:"Bu modelin güçlü ve zayıf yönleri:",t:"essay",hint:"Doğruluk, genelleme, yanlılık, yorumlanabilirlik."},
+  {q:"AI'nın etik boyutunu nasıl değerlendiriyorsun?",t:"essay",hint:"Ön yargı, şeffaflık, iş gücü etkisi, gizlilik."},
+  {q:"Bu teknolojiyi gerçek bir probleme uygulasan ne çözerdin?",t:"essay",hint:"Somut proje veya ürün fikri."},
+  {q:"İnsan zihni ile yapay zeka arasındaki temel fark:",t:"essay",hint:"Bilinç, anlama, yaratıcılık, beden."},
+  {q:"Bu alanda 5 yıl içinde nerede olmak istiyorsun?",t:"text"},
+  {q:"Bugün yazdığın ya da anladığın algoritma:",t:"text"},
+  {q:"AI'nin toplumu nasıl değiştireceğine dair görüşün:",t:"essay",hint:"İyimser, kötümser ya da realist perspektif."},
+  {q:"Veri kalitesi neden modelden daha önemli?",t:"essay",hint:"GIGO: garbage in, garbage out."},
+  {q:"Bu çalışmada en çok hangi matematiksel kavrama ihtiyaç duydun?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 25. HUKUK / SİYASET BİLİMİ
+// ─────────────────────────────────────────────────────────
+hukuk:[
+  {q:"Hangi hukuk alanını ya da siyasi kavramı çalıştın?",t:"text"},
+  {q:"Alan:",t:"choice",o:["Anayasa Hukuku","Medeni Hukuk","Ceza Hukuku","Uluslararası Hukuk","Siyaset Teorisi","Demokrasi","İnsan Hakları","Kamu Yönetimi","Siyasi Ekonomi"]},
+  {q:"Bu hukuki veya siyasi kavramın temel mantığı:",t:"essay",hint:"Neden bu kural ya da prensip var?"},
+  {q:"Günümüzdeki bir örnek olay ya da uygulama:",t:"essay",hint:"Teoriden pratiğe köprü."},
+  {q:"Adalet ve hukuk arasındaki gerilim:",t:"essay",hint:"Yasalar adil olmak zorunda mı?"},
+  {q:"Bu alandaki güç ilişkileri kim kimin lehine çalışıyor?",t:"essay",hint:"Yapısal analiz: marjinalize edilenler ve ayrıcalıklılar."},
+  {q:"Farklı siyasi sistemlerin bu konuya yaklaşımı:",t:"essay",hint:"Liberal, sosyal demokrat, otoriter perspektifler."},
+  {q:"Bir vatandaş olarak bu bilgi sana ne kazandırıyor?",t:"essay",hint:"Siyasi farkındalık ve katılım."},
+  {q:"Bu konuda kendi pozisyonun ve dayandığın değerler:",t:"text"},
+  {q:"Hukuk tarihi bu konuyu nasıl şekillendirdi?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 26. MÜZİK TEORİSİ / KOMPOZISYON
+// ─────────────────────────────────────────────────────────
+muzik_teorisi:[
+  {q:"Bugün hangi müzik teorisi konusunu çalıştın?",t:"text"},
+  {q:"Konu:",t:"choice",o:["Temel notalar/aralıklar","Akorlar (triads/7th)","Gam ve modlar","Armoni","Kontrpuan","Form analizi","Ritim/metrik","Orkestrasyon","Doğaçlama teorisi","Elektronik müzik üretim"]},
+  {q:"Bu kavramı kendi sözlerinle açıkla:",t:"essay",hint:"Teorik tanım + duyusal anlayış."},
+  {q:"Bu teoriyi bir enstrümanla ya da uygulamalı olarak deneyimledin mi?",t:"choice",o:["Evet, aktif uyguladım","Kısmen","Hayır, sadece teorik"]},
+  {q:"Bu teorinin müzikal ifadeye katkısı:",t:"essay",hint:"Teori araçtır — yaratıcılığı kısıtlamaz, yönlendirir."},
+  {q:"Beğendiğin bir eserde bu teoriyi fark edebildin mi?",t:"text"},
+  {q:"Müzik teorisi öğrenmek müziği daha güzel mi kılıyor?",t:"essay",hint:"Analitik anlayış ile duygusal deneyim dengesi."},
+  {q:"Beste ya da aranje denemesi yaptın mı?",t:"choice",o:["Evet","Kısa bir deneme","Hayır","Planlıyorum"]},
+  {q:"Bu konuyu öğrenmek için en etkili kaynağın:",t:"text"},
+  {q:"Müzikal kulağını geliştirmek için ne yapıyorsun?",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 27. YEMEKPİŞİRME / GASTRONOMİ
+// ─────────────────────────────────────────────────────────
+yemek:[
+  {q:"Ne pişirdin ya da ne öğrendin?",t:"text"},
+  {q:"Odak:",t:"choice",o:["Yeni tarif","Teknik geliştirme","Mutfak kimyası","Besin değeri","Sunum/estetik","Kültürel mutfak","Fermentasyon/koruma","Tatlı/pastacılık"]},
+  {q:"Bu yemeğin kültürel ya da tarihsel arka planı:",t:"essay",hint:"Köken, malzeme yolculuğu, kültürel anlam."},
+  {q:"Yaptığın teknik hatalar ve düzeltmen:",t:"text"},
+  {q:"Mutfak kimyası açısından bugün ne fark ettin?",t:"essay",hint:"Maillard reaksiyonu, protein denatürasyonu, emülsiyon."},
+  {q:"Bu yemek hangi duyguyu ya da anıyı çağrıştırıyor?",t:"text"},
+  {q:"Sürdürülebilir beslenme açısından bu yemek nasıl?",t:"choice",o:["Çok sürdürülebilir","Büyük ölçüde","Orta","Geliştirilebilir"]},
+  {q:"Yemek pişirmek meditasyon gibi mi hissettiriyor?",t:"essay",hint:"Akış hali, sabır ve duyusal farkındalık."},
+  {q:"Bir sonraki denemende ne farklı yapacaksın?",t:"text"},
+  {q:"Aşçılığın sanat mı yoksa zanaat mı olduğu hakkındaki görüşün:",t:"text"},
+],
+
+// ─────────────────────────────────────────────────────────
+// 28. DOĞA / ÇEVRE / EKOLOJİ
+// ─────────────────────────────────────────────────────────
+doga:[
+  {q:"Bugün doğayla nasıl bağlantı kurdun?",t:"choice",o:["Doğa yürüyüşü","Bahçe/bitki yetiştirme","Doğa gözlemi","Okuma/öğrenme","Belgesel izleme","Fotoğraf çekimi"]},
+  {q:"Gözlemlediğin bir doğal olgu ya da canlı:",t:"text"},
+  {q:"Bu ekosistem nasıl işliyor?",t:"essay",hint:"Besin zinciri, enerji akışı, karşılıklı bağımlılık."},
+  {q:"İklim değişikliğine ilişkin bugünkü düşüncen:",t:"essay",hint:"Bilimsel kanıt, kişisel sorumluluk, sistemik değişim."},
+  {q:"Doğayla zaman geçirmek zihinsel sağlığını nasıl etkiliyor?",t:"essay",hint:"Japonca 'Shinrin-yoku' (orman banyosu) perspektifi."},
+  {q:"Günlük hayatında ekolojik ayak izini azaltmak için ne yapıyorsun?",t:"text"},
+  {q:"Bir türün yok olması neden önemli?",t:"essay",hint:"Biyoçeşitlilik ve ekosistemin direnci."},
+  {q:"Doğadan aldığın en büyük ders:",t:"essay",hint:"Döngü, denge, değişim, direniş."},
+  {q:"Doğa sana ne hissettiriyor?",t:"text"},
+],
+
+};
+
+
+function getQs(actName){
+  const t=(actName||'').toLowerCase();
+  let cats=[];
+
+  // ── Müzik ──
+  if(/piyano|klavye|piano/.test(t))                                    cats=[...QB.piyano];
+  else if(/gitar|guitar|bas gitar|ukulele/.test(t))                    cats=[...QB.gitar];
+  else if(/keman|violin|viyola|cello|flut|enstruman/.test(t))          cats=[...QB.gitar];
+  else if(/muzik teori|solfej|armoni|kontrpuan|kompozisyon|beste/.test(t)) cats=[...QB.muzik_teorisi];
+  else if(/muzik|akustik|davul|perkusy/.test(t))                       cats=[...QB.piyano,...QB.gitar];
+
+  // ── Entelektüel ──
+  else if(/felsefe|filozof|metafizik|etik|epistemoloji|ontoloji|mantik|varoluş/.test(t)) cats=[...QB.felsefe];
+  else if(/kitap|roman|edebiyat|siir|hikaye okuma/.test(t))            cats=[...QB.kitap];
+  else if(/tarih|osmanli|cumhuriyet|antik|savas|imparatorluk|arkeoloji/.test(t)) cats=[...QB.tarih];
+  else if(/noroloji|norobil|beyin|sinir sistemi/.test(t))              cats=[...QB.psikoloji];
+  else if(/psikoloji|psikanaliz|terapi|bilissel|sosyal psikoloji|davranis/.test(t)) cats=[...QB.psikoloji];
+  else if(/fizik|kimya|biyoloji|astronomi|kuantum|genetik|molekul|hucre|evrim/.test(t)) cats=[...QB.bilim];
+  else if(/matematik|calculus|cebir|geometri|istatistik|olasilik|analiz|turev|integral|lineer/.test(t)) cats=[...QB.matematik];
+  else if(/yapay zeka|makine ogren|derin ogren|nlp|veri bilim|ai|ml|llm/.test(t)) cats=[...QB.yapay_zeka];
+  else if(/kod|programla|python|javascript|react|swift|java|yazilim|backend|frontend|api/.test(t)) cats=[...QB.kodlama];
+  else if(/ekonomi|finans|borsa|yatirim|muhasebe|makro|mikro ekonomi/.test(t)) cats=[...QB.ekonomi];
+  else if(/hukuk|anayasa|medeni|ceza hukuk|siyaset|demokrasi|politika/.test(t)) cats=[...QB.hukuk];
+  else if(/dil|ingilizce|almanca|fransizca|ispanyolca|japonca|korece|cinese|arapca|rusca|italyanca/.test(t)) cats=[...QB.dil];
+  else if(/yazar|hikaye yaz|makale yaz|roman yaz|blog yaz|senaryo|yaratici yaz|deneme yaz/.test(t)) cats=[...QB.yazarlik];
+
+  // ── Fiziksel & Zihinsel ──
+  else if(/egzersiz|spor|kosu|yuruyu|gym|antrenman|yoga|pilates|yuzme|bisiklet|doVus|dans|halter|crossfit/.test(t)) cats=[...QB.egzersiz];
+  else if(/beslen|diyet|saglik|uyku|stres/.test(t))                    cats=[...QB.saglik];
+  else if(/meditasyon|mindfulness|farkindalik|vipassana|zazen/.test(t)) cats=[...QB.meditasyon];
+
+  // ── Sanat & Tasarım ──
+  else if(/ciz|resim|boyama|heykel|illustrasyon|suluboya|pastel|dijital sanat/.test(t)) cats=[...QB.sanat];
+  else if(/fotograf|kamera|lens|video çek|film cek/.test(t))           cats=[...QB.fotograf];
+
+  // ── Kariyer & Strateji ──
+  else if(/girisim|startup|proje yonet|kariyer|pazarlama|satis|strateji|sunum/.test(t)) cats=[...QB.girisim];
+  else if(/liderlik|yonetim|kocluk|mentorluk|takim yonet/.test(t))     cats=[...QB.liderlik];
+  else if(/satranc|chess|go|strateji oyun/.test(t))               cats=[...QB.satranc];
+
+  // ── Günlük Yaşam ──
+  else if(/yemek|pisir|tarif|gastro|mutfak|ascilik/.test(t))           cats=[...QB.yemek];
+  else if(/doga|bahce|ekoloji|cevre|orman|deniz yuru/.test(t))         cats=[...QB.doga];
+  else if(/okuma|makale oku|arastirma oku|kaynak/.test(t))             cats=[...QB.okuma];
+  else if(/gunluk|refleksiyon|kendini tan|ic ses/.test(t))             cats=[...QB.refleksiyon];
+
+  // ── Varsayılan ──
+  else cats=[...QB.default];
+
+  // Her oturuma QB.default'tan 2 soru ekle (çeşitlilik)
+  const defaultExtras = shuffle(QB.default.filter(q => !cats.some(c => c.q === q.q))).slice(0,2);
+
+  // Essay'leri ayır (max 2 essay)
+  const essays  = shuffle(cats.filter(q => q.t==='essay'));
+  const choices = shuffle(cats.filter(q => q.t==='choice'));
+  const texts   = shuffle(cats.filter(q => q.t==='text'));
+
+  // Bu seviyeye ait özel sorular
+  const lvLabel = currentLevel();
+  const lvQs = (levelQuestions[lvLabel]||[]).map(q=>({q,t:'text'}));
+
+  // Mix: 2 choice + 2 text + 2 essay + 1 level + 2 default
+  const selected=[
+    ...choices.slice(0,2),
+    ...texts.slice(0,2),
+    ...essays.slice(0,2),
+    ...shuffle(lvQs).slice(0,1),
+    ...defaultExtras,
+  ];
+
+  return selected.filter(Boolean);
+}
+
+
+function currentLevel(){
+  const lv=getLevel(getTotalSessScore());
+  return lv?lv.label:'';
+}
+
+function openCheckin(sess){
+  if(!sess){return;} ciSess=sess; ciQs=getQs(sess?.actName||'');
+  $('ci-session-info').textContent=`${sess.actName} · ${fmtHm(sess.minutes)} · ${sess.date}`;
+  $('ci-questions').innerHTML=ciQs.map((q,i)=>{
+    const hintHtml=q.hint?`<div class="essay-prompt">💡 ${esc(q.hint)}</div>`:'';
+    const body=q.t==='choice'
+      ?`<div class="q-options" id="ci-opts-${i}">${q.o.map(o=>`<button class="q-opt-btn" onclick="pickOpt(this,${i})">${esc(o)}</button>`).join('')}</div>`
+      :hintHtml+`<textarea id="ci-t-${i}" rows="${q.t==='essay'?4:2}" style="min-height:${q.t==='essay'?'80':'52'}px" placeholder="${q.t==='essay'?'Düşüncelerini yaz…':'Yanıtla…'}"></textarea>`;
+    return `<div style="margin-bottom:.8rem">
+      <div class="modal-question" onclick="toggleCiQ(this)" style="cursor:pointer;user-select:none">
+        <span>▸</span> ${esc(q.q)}
+      </div>
+      <div class="ci-q-body" style="overflow:hidden;max-height:0;transition:max-height .25s ease">${body}</div>
+    </div>`;
+  }).join('');
+  openModal('modal-checkin');
+}
+function toggleCiQ(header){
+  const body=header.nextElementSibling;
+  const open=body.style.maxHeight!=='0px'&&body.style.maxHeight!=='';
+  body.style.maxHeight=open?'0':'500px';
+  header.querySelector('span').textContent=open?'▸':'▾';
+}
+function pickOpt(btn,i){
+  $(`ci-opts-${i}`).querySelectorAll('.q-opt-btn').forEach(b=>b.classList.remove('picked'));
+  btn.classList.add('picked');
+}
+function saveCheckin(){
+  const answers=ciQs.map((q,i)=>{
+    if(q.t==='choice'){ const p=$(`ci-opts-${i}`)?.querySelector('.picked'); return {q:q.q,a:p?p.textContent:'—',type:'choice'}; }
+    return {q:q.q,a:($(`ci-t-${i}`)?.value.trim()||'—'),type:q.t||'text'};
+  });
+  checkins.push({id:Date.now(),sessId:ciSess.id,actName:ciSess.actName,actColor:ciSess.actColor,date:ciSess.date,minutes:ciSess.minutes,answers});
+  save(); closeModal('modal-checkin'); toast('📝 Kayıt oluşturuldu!');
+}
+function skipCheckin(){ closeModal('modal-checkin'); }
+
+// ════════════════════════════════════════════════════════════════
+// SCORING ENGINE
+// ════════════════════════════════════════════════════════════════
+function getActivityCategory(name){
+  const t=(name||'').toLowerCase();
+  if(/piyano|gitar|keman|flüt|org|enstrüman|müzik|nota/.test(t)) return 'muzik';
+  if(/felsefe|filozof|metafizik|etik|epistemoloji/.test(t)) return 'felsefe';
+  if(/kitap|roman|okuma|oku/.test(t)) return 'okuma';
+  if(/matematik|calculus|cebir|geometri|istatistik|fizik|kimya/.test(t)) return 'bilim';
+  if(/kod|programla|python|javascript|react|yazılım/.test(t)) return 'kodlama';
+  if(/dil|english|deutsch|français|japonya|korece/.test(t)) return 'dil';
+  if(/yaz|hikaye|makale|şiir|blog|senaryo/.test(t)) return 'yazarlık';
+  if(/egzersiz|spor|koşu|yürüyüş|gym|antrenman|yoga|yüzme/.test(t)) return 'spor';
+  if(/meditasyon|nefes|mindful/.test(t)) return 'meditasyon';
+  if(/çiz|resim|heykel|sanat|tasarım/.test(t)) return 'sanat';
+  return 'genel';
+}
+const CAT_BASE={felsefe:3.5,bilim:3.5,kodlama:3.2,dil:3.0,muzik:3.0,yazarlık:2.8,okuma:2.5,sanat:2.5,spor:2.0,meditasyon:1.8,genel:2.0};
+
+// Much harder level thresholds
+const LEVELS=[
+  {min:0,    label:'🌱 Tohum',     color:'#8a8799'},
+  {min:1000, label:'📖 Öğrenci',   color:'#5c9eff'},
+  {min:3000, label:'⚡ Azimli',    color:'#52d9a0'},
+  {min:7500, label:'🔥 Kararlı',   color:'#e8c547'},
+  {min:18000,label:'💎 Uzman',     color:'#b87bff'},
+  {min:40000,label:'🏆 Üstat',     color:'#ff9f45'},
+  {min:80000,label:'🌟 Efsane',    color:'#ff6bce'},
+  {min:150000,label:'👑 Ölümsüz',  color:'#ffd700'},
+];
+function getLevel(pts){ let lv=LEVELS[0]; for(const l of LEVELS){if(pts>=l.min)lv=l;else break;} return lv; }
+function getNextLevel(pts){ for(const l of LEVELS){if(pts<l.min)return l;} return null; }
+function getTotalSessScore(){ return Object.values(sessScores).reduce((s,v)=>s+(v.total||0),0); }
+function getTotalPts(){
+  const task=Object.values(taskScores).reduce((s,v)=>s+v,0);
+  const sess=getTotalSessScore();
+  return task+sess-totalSpent;
+}
+
+function calcSessionScore(sess,isCompleted){
+  const breakdown=[]; const cat=getActivityCategory(sess.actName);
+  const base=CAT_BASE[cat]||2.0; const mins=sess.minutes;
+  const baseTotal=Math.round(base*mins);
+  breakdown.push({label:`Temel (${cat} × ${mins}dk)`,val:baseTotal,type:'neu'});
+  let total=baseTotal;
+  if(isCompleted){ const b=Math.round(baseTotal*.20); breakdown.push({label:'✅ Tam tamamlama (+%20)',val:b,type:'pos'}); total+=b; }
+  if(mins>=90){ const b=Math.round(baseTotal*.15); breakdown.push({label:'⏳ Uzun oturum 90dk+ (+%15)',val:b,type:'pos'}); total+=b; }
+  else if(mins>=60){ const b=Math.round(baseTotal*.08); breakdown.push({label:'⏱ Uzun oturum 60dk+ (+%8)',val:b,type:'pos'}); total+=b; }
+  const hour=new Date().getHours();
+  if(hour>=5&&hour<9){ const b=Math.round(baseTotal*.25); breakdown.push({label:'🌅 Sabah erken 05-09 (+%25)',val:b,type:'pos'}); total+=b; }
+  else if(hour>=9&&hour<12){ const b=Math.round(baseTotal*.15); breakdown.push({label:'☀️ Sabah 09-12 (+%15)',val:b,type:'pos'}); total+=b; }
+  else if(hour>=23||hour<2){ const b=Math.round(baseTotal*.10); breakdown.push({label:'🌙 Gece geç 23-02 (-%10)',val:-b,type:'neg'}); total-=b; }
+  const streak=calcStreak();
+  if(streak>=30){ const b=Math.round(baseTotal*.40); breakdown.push({label:`🔥 Seri çarpanı ${streak}gün (+%40)`,val:b,type:'pos'}); total+=b; }
+  else if(streak>=14){ const b=Math.round(baseTotal*.25); breakdown.push({label:`🔥 Seri çarpanı ${streak}gün (+%25)`,val:b,type:'pos'}); total+=b; }
+  else if(streak>=7){ const b=Math.round(baseTotal*.15); breakdown.push({label:`🔥 Seri çarpanı ${streak}gün (+%15)`,val:b,type:'pos'}); total+=b; }
+  else if(streak>=3){ const b=Math.round(baseTotal*.08); breakdown.push({label:`🔥 Seri çarpanı ${streak}gün (+%8)`,val:b,type:'pos'}); total+=b; }
+  const todaySess=sessions.filter(s=>s.date===today()&&s.id!==sess.id);
+  if(!todaySess.length){ breakdown.push({label:'🌟 Günün ilk oturumu (+15)',val:15,type:'pos'}); total+=15; }
+  const last=sessions.filter(s=>s.date===today()&&s.id!==sess.id).slice(-1)[0];
+  if(last&&last.actName!==sess.actName){ breakdown.push({label:'🎯 Çeşitlilik bonusu (+10)',val:10,type:'pos'}); total+=10; }
+  if(isCompleted&&mins>=45){ const b=Math.round(baseTotal*.10); breakdown.push({label:'🧠 Derin çalışma 45dk+ (+%10)',val:b,type:'pos'}); total+=b; }
+  if((inventory.doubledays||0)>0){ breakdown.push({label:'⚡ 2x Puan Günü (+%100)',val:total,type:'pos'}); total*=2; inventory.doubledays--; save(); }
+  return {total:Math.max(total,1),breakdown};
+}
+
+function awardSessionScore(sess,isCompleted){
+  const result=calcSessionScore(sess,isCompleted);
+  const prevTotal=getTotalSessScore();
+  sessScores[sess.id]={total:result.total,actName:sess.actName,date:sess.date};
+  saveSessScores();
+  showScorePopup(result);
+  // Level up check
+  const newTotal=getTotalSessScore();
+  const prevLv=getLevel(prevTotal);
+  const newLv=getLevel(newTotal);
+  if(newLv.label!==prevLv.label&&newLv.label!==lastLevelLabel){
+    lastLevelLabel=newLv.label;
+    localStorage.setItem('p5-lastlvl',lastLevelLabel);
+    setTimeout(()=>showLevelUp(newLv),1500);
+  }
+}
+
+let pendingCheckinFromPopup=null;
+function showScorePopup(result){
+  $('sp-pts').textContent='+'+result.total;
+  $('sp-breakdown').innerHTML=result.breakdown.map(b=>`
+    <div class="sp-row ${b.type==='pos'?'bonus':b.type==='neg'?'penalty':''}">
+      <span class="sp-row-label">${esc(b.label)}</span>
+      <span class="sp-row-val ${b.type}">${b.val>0?'+':''}${b.val} pt</span>
+    </div>`).join('');
+  $('score-popup').classList.add('show');
+}
+function closeScorePopup(){
+  $('score-popup').classList.remove('show');
+  if(pendingCheckinSess){
+    const s=pendingCheckinSess; pendingCheckinSess=null;
+    setTimeout(()=>openCheckin(s),50);
+  }
+}
+
+function showLevelUp(lv){
+  $('lu-icon').textContent=lv.label.split(' ')[0];
+  $('lu-title').textContent='Yeni Seviye: '+lv.label;
+  $('lu-msg').textContent='Tebrikler! '+lv.label+' seviyesine ulaştın. Bu seviyeye özel bir soru eklemek ister misin?';
+  $('lu-question-inp').value='';
+  openModal('modal-levelup');
+}
+function saveLevelQuestion(){
+  const q=$('lu-question-inp').value.trim();
+  if(q&&lastLevelLabel){
+    if(!levelQuestions[lastLevelLabel]) levelQuestions[lastLevelLabel]=[];
+    levelQuestions[lastLevelLabel].push(q);
+    save(); toast('✨ Soru eklendi!');
+  }
+  closeModal('modal-levelup');
+}
+
+// ════════════════════════════════════════════════════════════════
+// STREAK
+// ════════════════════════════════════════════════════════════════
+function calcStreak(){
+  const sessDates=new Set(sessions.map(s=>s.date));
+  const taskDates=new Set(Object.entries(taskScores).filter(([,v])=>v>0).map(([k])=>k));
+  // Task streak only counts if 5+ tasks done that day
+  const taskStreakDates=new Set();
+  const td=today();
+  // Check each day: count completed tasks
+  [...new Set([...sessDates,...taskDates])].forEach(d=>{
+    const tasksDone=tasks.filter(t=>t.doneDate===d).length;
+    const hasSess=sessDates.has(d);
+    if(hasSess||(tasksDone>=5)) taskStreakDates.add(d);
+  });
+  const frozenDates=new Set(_safeJSON('p5-frozen',[])||[]);
+  const done=new Set([...taskStreakDates,...frozenDates]);
+  let n=0,d=new Date();
+  while(true){ const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); if(done.has(k)){n++;d.setDate(d.getDate()-1);}else break; }
+  return n;
+}
+
+function checkAutoFreeze(){
+  if((inventory.freezes||0)<=0) return;
+  const streak=calcStreak();
+  // If streak is >0 and today not counted yet, check if at risk
+  // Auto-freeze: if it's late (>20:00) and no session/5tasks today
+  const hour=new Date().getHours();
+  if(hour>=20&&streak>0){
+    const d=today();
+    const hasSess=sessions.some(s=>s.date===d);
+    const tasksDone=tasks.filter(t=>t.doneDate===d).length;
+    if(!hasSess&&tasksDone<5){
+      // Auto-freeze
+      inventory.freezes--;
+      const frozen=_safeJSON('p5-frozen',[])||[];
+      if(!frozen.includes(d)){frozen.push(d);localStorage.setItem('p5-frozen',JSON.stringify(frozen));}
+      save();
+      toast('🧊 '+streak+' günlük serin otomatik donduruldu!',4000);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ANALIZ PAGE
+// ════════════════════════════════════════════════════════════════
+
+function setAnalizTab(tab,btn){
+  curAnalizTab=tab;
+  document.querySelectorAll('.analiz-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  ['stats','log','report'].forEach(t=>{
+    const el=$('analiz-'+t);
+    if(el) el.style.display=(t===tab?'block':'none');
+  });
+  if(tab==='stats') renderStats();
+  else if(tab==='log') renderLog();
+}
+
+function renderAchievements(){
+  const totalMins=sessions.reduce((s,x)=>s+x.minutes,0);
+  const totalDays=new Set(sessions.map(s=>s.date)).size;
+  const totalSess=sessions.length;
+  const totalTasks=Object.values(taskScores).reduce((s,v)=>s+v,0);
+  const streak=calcStreak();
+  const totalPtsAll=getTotalSessScore()+Object.values(taskScores).reduce((s,v)=>s+v,0);
+  $('ach-grid').innerHTML=[
+    {icon:'⏱',val:fmtHm(totalMins),lbl:'Toplam Süre'},
+    {icon:'📅',val:totalDays,lbl:'Aktif Gün'},
+    {icon:'🎯',val:totalSess,lbl:'Oturum'},
+    {icon:'✅',val:Object.values(taskScores).reduce((s,v)=>s+(v>0?1:0),0),lbl:'Görevli Gün'},
+    {icon:'🔥',val:streak+'🔥',lbl:'Güncel Seri'},
+    {icon:'🪙',val:totalPtsAll,lbl:'Toplam Puan'},
+  ].map(a=>`<div class="ach-card"><span class="ach-icon">${a.icon}</span><div class="ach-val">${a.val}</div><div class="ach-lbl">${a.lbl}</div></div>`).join('');
+}
+
+function renderSessScoreBanner(){
+  const total=getTotalSessScore(); const lv=getLevel(total); const next=getNextLevel(total);
+  const pct=next?Math.round(((total-lv.min)/(next.min-lv.min))*100):100;
+  $('sess-score-banner').innerHTML=`
+    <div class="ssb-item"><div class="ssb-val" style="color:var(--accent)">${total}</div><div class="ssb-lbl">Oturum Puanı</div></div>
+    <div class="ssb-item" style="flex:1;min-width:140px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.28rem">
+        <span class="level-badge" style="background:${lv.color}22;color:${lv.color};border:1px solid ${lv.color}44">${lv.label}</span>
+        ${next?`<span style="font-size:.68rem;color:var(--muted2)">${next.min-total} pt → ${next.label}</span>`:'<span style="font-size:.68rem;color:var(--accent)">Maksimum! 🌟</span>'}
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${lv.color};border-radius:4px;transition:width .5s"></div></div>
+    </div>
+    <div class="ssb-item"><div class="ssb-val" style="color:var(--purple)">${getTotalPts()}</div><div class="ssb-lbl">Harcanabilir</div></div>`;
+}
+
+function renderStats(){
+  renderAchievements();
+  renderSessScoreBanner();
+  const sessIn=p=>{ const c=new Date(); if(p==='week')c.setDate(c.getDate()-7);else if(p==='month')c.setMonth(c.getMonth()-1);else c.setFullYear(c.getFullYear()-1); return sessions.filter(s=>new Date(s.date+'T12:00:00')>=c); };
+  const wM=sessIn('week').reduce((s,x)=>s+x.minutes,0);
+  const mM=sessIn('month').reduce((s,x)=>s+x.minutes,0);
+  const tot=sessions.reduce((s,x)=>s+x.minutes,0);
+  const uD=new Set(sessions.map(s=>s.date)).size;
+  const str=calcStreak();
+  $('stats-top').innerHTML=`
+    <div class="s-card"><div class="s-val" style="color:var(--accent)">${fmtHm(wM)}</div><div class="s-lbl">Bu Hafta</div></div>
+    <div class="s-card"><div class="s-val" style="color:var(--blue)">${fmtHm(mM)}</div><div class="s-lbl">Bu Ay</div></div>
+    <div class="s-card"><div class="s-val" style="color:var(--green)">${fmtHm(uD?Math.round(tot/uD):0)}</div><div class="s-lbl">Günlük Ort.</div></div>
+    <div class="s-card"><div class="s-val" style="color:var(--red)">${str}🔥</div><div class="s-lbl">Seri</div></div>`;
+  renderBarChart(); renderTopActs(); renderStreak(); renderSessScoreBreakdown(); renderGoals();
+}
+
+function setPeriod(p,btn){ curPeriod=p; document.querySelectorAll('.period-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderBarChart(); }
+
+function getRange(p){
+  const now=new Date(),d=[];
+  if(p==='week'){for(let i=6;i>=0;i--){const x=new Date(now);x.setDate(x.getDate()-i);d.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'));}}
+  else if(p==='month'){for(let i=29;i>=0;i--){const x=new Date(now);x.setDate(x.getDate()-i);d.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'));}}
+  else{for(let i=11;i>=0;i--){const x=new Date(now);x.setMonth(x.getMonth()-i);d.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'));}}
+  return d;
+}
+function renderBarChart(){
+  const dates=getRange(curPeriod),isY=curPeriod==='year';
+  const tots=dates.map(d=>isY?sessions.filter(s=>s.date.slice(0,7)===d).reduce((s,x)=>s+x.minutes,0):sessions.filter(s=>s.date===d).reduce((s,x)=>s+x.minutes,0));
+  const maxV=Math.max(...tots,1);
+  const DAY=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],MON=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  function lbl(d){ if(isY) return MON[parseInt(d.slice(5,7))-1]; const dt=new Date(d+'T12:00:00'); return curPeriod==='week'?DAY[dt.getDay()]:d.slice(8); }
+  const step=curPeriod==='month'?5:1;
+  $('bar-chart').innerHTML=tots.map((v,i)=>`<div class="bar-col"><div class="bar-v" style="height:${Math.round((v/maxV)*88)+2}%;background:${v>0?'var(--accent)':'var(--border)'}">${v>0?`<div class="bar-tip">${fmtHm(v)}</div>`:''}</div></div>`).join('');
+  $('bar-labels').innerHTML=dates.map((d,i)=>`<div style="flex:1;text-align:center;font-size:.58rem;color:var(--muted);overflow:hidden">${i%step===0?lbl(d):''}</div>`).join('');
+}
+function renderTopActs(){
+  const map={};
+  sessions.forEach(s=>{ if(!map[s.actName]) map[s.actName]={name:s.actName,color:s.actColor,min:0}; map[s.actName].min+=s.minutes; });
+  const srt=Object.values(map).sort((a,b)=>b.min-a.min).slice(0,5); const mx=srt[0]?.min||1;
+  $('top-acts').innerHTML=srt.length?srt.map((a,i)=>`
+    <div class="rank-row"><div class="rank-n">${i+1}</div><div class="apc-dot" style="background:${a.color||'#e8c547'}"></div>
+    <div style="flex:1;min-width:0"><div style="font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.15rem">${esc(a.name)}</div>
+    <div class="rank-track"><div class="rank-fill" style="width:${Math.round(a.min/mx*100)}%;background:${a.color||'#e8c547'}"></div></div></div>
+    <div class="rank-t">${fmtHm(a.min)}</div></div>`).join(''):'<div style="color:var(--muted);font-size:.8rem">Kayıt yok.</div>';
+}
+function renderStreak(){
+  const now=new Date(),last30=[];
+  for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);last30.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));}
+  const sessDates=new Set(sessions.map(s=>s.date));
+  const taskStreakDates=new Set();
+  last30.forEach(d=>{
+    const tasksDone=tasks.filter(t=>t.doneDate===d).length;
+    if(sessDates.has(d)||tasksDone>=5) taskStreakDates.add(d);
+  });
+  const frozenDates=new Set(_safeJSON('p5-frozen',[])||[]);
+  $('streak-grid').innerHTML=last30.map(d=>{
+    const t=today(); const isFrozen=frozenDates.has(d);
+    let cls=''; if(d===t) cls='today'; else if(isFrozen) cls='done'; else if(taskStreakDates.has(d)) cls='done';
+    return `<div class="s-dot ${cls}" data-date="${d}"${isFrozen?' title="Donduruldu 🧊"':''}></div>`;
+  }).join('');
+  const s=calcStreak();
+  $('streak-txt').textContent=s>0?`${s} günlük seri 🔥 — devam et!`:'Bugün bir oturum başlat veya 5 görev tamamla!';
+}
+function renderSessScoreBreakdown(){
+  const el=$('sess-score-breakdown'); if(!el) return;
+  const map={};
+  sessions.forEach(s=>{ const sc=sessScores[s.id]?.total||0; if(!map[s.actName]) map[s.actName]={name:s.actName,color:s.actColor,pts:0,count:0}; map[s.actName].pts+=sc; map[s.actName].count++; });
+  const sorted=Object.values(map).sort((a,b)=>b.pts-a.pts); const maxPts=sorted[0]?.pts||1;
+  el.innerHTML=sorted.length?`<div class="sess-score-hist">`+sorted.map(a=>`
+    <div class="ssh-row"><div class="ssh-name" title="${esc(a.name)}">${esc(a.name)}</div>
+    <div class="ssh-bar-wrap"><div class="ssh-bar-fill" style="width:${Math.round(a.pts/maxPts*100)}%;background:${a.color||'#e8c547'}"></div></div>
+    <div class="ssh-pts">${a.pts}pt</div><div style="font-size:.66rem;color:var(--muted2);flex-shrink:0;margin-left:.28rem">${a.count}x</div></div>`).join('')+`</div>`:'<div style="color:var(--muted);font-size:.8rem">Henüz oturum yok.</div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// LOG PAGE
+// ════════════════════════════════════════════════════════════════
+function renderLog(){
+  const list=$('log-list');
+  if(!checkins.length){list.innerHTML='<div class="tasks-empty"><span style="font-size:1.8rem;display:block;margin-bottom:.5rem;opacity:.4">📓</span>Henüz kayıt yok.</div>';return;}
+  const sorted=[...checkins].sort((a,b)=>b.id-a.id);
+  list.innerHTML=sorted.map(ci=>`
+    <div class="log-entry">
+      <div class="log-date" onclick="this.nextElementSibling.style.maxHeight=this.nextElementSibling.style.maxHeight==='0px'||!this.nextElementSibling.style.maxHeight?'2000px':'0px'">
+        <span>${ci.date} · <span style="color:${ci.actColor||'#e8c547'};font-weight:600">${esc(ci.actName)}</span> · ${fmtHm(ci.minutes)}</span>
+        <span style="font-size:.7rem;color:var(--muted2)">▸ ${ci.answers?.filter(a=>a.a&&a.a!=='—').length||0} yanıt</span>
+      </div>
+      <div style="overflow:hidden;max-height:0;transition:max-height .25s ease">
+        ${(ci.answers||[]).filter(a=>a.a&&a.a!=='—').map(a=>`
+          <div class="log-q">▸ ${esc(a.q)}</div>
+          <div class="${a.type==='essay'?'log-essay':'log-a'}">${esc(a.a)}</div>
+        `).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// REPORT
+// ════════════════════════════════════════════════════════════════
+async function generateReport(){
+  const weekOffset=parseInt($('report-week').value)||0;
+  const now=new Date();
+  // Fix: Start from Monday (Pazartesi)
+  const dayOfWeek=now.getDay(); // 0=Sun
+  const daysFromMon=dayOfWeek===0?6:dayOfWeek-1; // Mon=0
+  const weekStart=new Date(now); weekStart.setDate(now.getDate()-daysFromMon-weekOffset*7); weekStart.setHours(0,0,0,0);
+  const weekEnd=new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
+  const wStartStr=weekStart.getFullYear()+'-'+String(weekStart.getMonth()+1).padStart(2,'0')+'-'+String(weekStart.getDate()).padStart(2,'0');
+  const wEndStr=weekEnd.getFullYear()+'-'+String(weekEnd.getMonth()+1).padStart(2,'0')+'-'+String(weekEnd.getDate()).padStart(2,'0');
+  const weekSessions=sessions.filter(s=>s.date>=wStartStr&&s.date<=wEndStr);
+  const weekCheckins=checkins.filter(c=>c.date>=wStartStr&&c.date<=wEndStr);
+  const weekTaskDates=Object.entries(taskScores).filter(([d,])=>d>=wStartStr&&d<=wEndStr);
+  const weekTaskPts=weekTaskDates.reduce((s,[,v])=>s+v,0);
+  if(!weekSessions.length&&!weekCheckins.length&&!weekTaskPts){
+    $('report-output').innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Bu hafta için kayıt bulunamadı.</div>';
+    return;
+  }
+  const totalMin=weekSessions.reduce((s,x)=>s+x.minutes,0);
+  const actMap={}; weekSessions.forEach(s=>{ if(!actMap[s.actName])actMap[s.actName]=0; actMap[s.actName]+=s.minutes; });
+  const actSummary=Object.entries(actMap).sort((a,b)=>b[1]-a[1]).map(([n,m])=>`${n}: ${fmtHmLong(m)}`).join('\n');
+  const taskSummary=`Görev puanı: ${weekTaskPts} puan, ${weekTaskDates.length} günlük görev kaydı`;
+  const ciSummary=weekCheckins.map(ci=>{
+    const lines=(ci.answers||[]).filter(a=>a.a&&a.a!=='—').map(a=>`  - ${a.q}\n    → ${a.a}`).join('\n');
+    return `[${ci.date} - ${ci.actName} - ${fmtHmLong(ci.minutes)}]\n${lines}`;
+  }).join('\n\n');
+  $('report-output').innerHTML=`<div class="report-skeleton"><div class="skel" style="height:20px;width:60%"></div><div class="skel" style="height:13px;width:90%"></div><div class="skel" style="height:13px;width:80%"></div><div class="skel" style="height:20px;width:50%;margin-top:.35rem"></div><div class="skel" style="height:13px;width:75%"></div></div>`;
+  $('report-articles-section').style.display='none';
+  const prompt=`Sen deneyimli bir kişisel gelişim koçu ve veri analisti olarak görev yapıyorsun. Kullanıcının haftalık verilerini derinlemesine analiz ederek kapsamlı, kişiselleştirilmiş bir Türkçe rapor yaz.
+
+## HAFTA: ${wStartStr} → ${wEndStr} (Pazartesi başlangıcı)
+## GENEL ÖZET
+Toplam çalışma: ${fmtHmLong(totalMin)} | Oturum sayısı: ${weekSessions.length}
+Aktif gün sayısı: ${new Set(weekSessions.map(s=>s.date)).size}/7
+Ortalama günlük süre: ${fmtHmLong(weekSessions.length?Math.round(totalMin/Math.max(new Set(weekSessions.map(s=>s.date)).size,1)):0)}
+
+## ETKİNLİK DETAYLARI
+${actSummary||'(bu hafta oturum yapılmadı)'}
+
+## GÖREV PERFORMANSI
+${taskSummary}
+
+## GÜNLÜK NOTLAR VE DÜŞÜNCELEr
+${ciSummary||'(bu hafta günlük not girilmemiş)'}
+
+HTML formatında rapor yaz. Kullan: h2 (ana bölümler), h3 (alt başlıklar), p, ul, li, strong, em, <div class="highlight"> (önemli bulgular için).
+
+ZORUNLU BÖLÜMLER:
+1. <h2>📊 Haftalık Genel Bakış</h2> — Sayısal özet + genel değerlendirme + bu haftanın "tonu"
+2. <h2>🎯 Etkinlik & Görev Analizi</h2> — Her etkinlik ayrı analiz + görev tamamlama oranı + puan dağılımı + en verimli günler
+3. <h2>🧠 Öğrenme ve Gelişim Kalıpları</h2> — Günlük notlardan çıkarılan içgörüler + tekrar eden temalar + entelektüel merak alanları
+4. <h2>💪 Bu Haftanın Güçlü Yanları</h2> — Spesifik başarılar (tarih/etkinlik adıyla) + momentum noktaları
+5. <h2>🌱 Gelişim Fırsatları</h2> — Yapıcı geri bildirim + hangi alanlarda daha az ilerlendi + neden olabilir
+6. <h2>🚀 Gelecek Hafta Eylem Planı</h2> — 4-6 SPESIFIK, ölçülebilir hedef + öneri süre/sıklık + gerekçe
+
+YAZIM KURALLARI:
+- "Sen" diye samimi hitap et, resmi olma
+- Günlük notlardaki spesifik detaylara atıf yap (varsa)
+- Soyut övgü değil, somut gözlem yaz ("Felsefe oturumlarında Kant üzerine çok derin notlar aldın" gibi)
+- Gelişim alanları için yıkıcı değil, yapıcı dil kullan
+- Her öneri için kısa gerekçe ekle
+- ~700-900 kelime
+- Türkçe dil bilgisine dikkat et`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const html=data.content?.find(b=>b.type==='text')?.text||'Rapor oluşturulamadı.';
+    $('report-output').innerHTML=`<div class="report-meta">📅 ${wStartStr} – ${wEndStr} &nbsp;·&nbsp; ${fmtHmLong(totalMin)} &nbsp;·&nbsp; ${weekSessions.length} oturum &nbsp;·&nbsp; ${weekTaskPts}pt görev</div><div class="report-body">${html}</div>`;
+    await generateArticles(weekCheckins);
+  }catch(e){ $('report-output').innerHTML=`<div style="color:var(--red);font-size:.83rem">Rapor oluşturulamadı. İnternet bağlantını kontrol et.</div>`; }
+}
+
+async function generateArticles(weekCheckins){
+  const essays=[];
+  weekCheckins.forEach(ci=>{ (ci.answers||[]).filter(a=>a.type==='essay'&&a.a&&a.a.length>30).forEach(a=>{ essays.push({actName:ci.actName,actColor:ci.actColor||'#e8c547',date:ci.date,question:a.q,answer:a.a}); }); });
+  if(!essays.length){$('report-articles-section').style.display='none';return;}
+  $('report-articles-section').style.display='block';
+  $('report-articles').innerHTML=essays.map((_,i)=>`<div class="article-card" id="art-${i}"><div class="report-skeleton"><div class="skel" style="height:15px;width:70%"></div><div class="skel" style="height:11px;width:90%"></div></div></div>`).join('');
+  const chunks=[]; for(let i=0;i<essays.length;i+=3) chunks.push(essays.slice(i,i+3));
+  for(const chunk of chunks){
+    await Promise.all(chunk.map(async(essay,_idx)=>{
+      const i=essays.indexOf(essay);
+      const prompt=`Kullanıcı şunu yazdı:\nEtkinlik: ${essay.actName}\nTarih: ${essay.date}\nSoru: ${essay.question}\nYanıt: ${essay.answer}\n\nBu yanıtı zenginleştir. ## başlıklı, 2-3 paragraf Türkçe mini makale yaz. Filozoftan/kavramdan bahsediliyorsa ek bağlam ekle. ~150-200 kelime. Sadece içerik.`;
+      try{
+        const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:prompt}]})});
+        const d=await r.json();
+        const text=d.content?.find(b=>b.type==='text')?.text||'';
+        const lines=text.split('\n');
+        const title=lines.find(l=>l.startsWith('##'))?.replace(/^##\s*/,'')||essay.question;
+        const body=lines.filter(l=>!l.startsWith('##')).join('\n').trim();
+        $(`art-${i}`).innerHTML=`<div class="article-meta">${essay.date} · <span style="color:${essay.actColor}">${esc(essay.actName)}</span></div><div class="article-title">${esc(title)}</div><div class="article-body">${esc(body)}</div>`;
+      }catch(e){ $(`art-${i}`).innerHTML='<div style="color:var(--muted);font-size:.8rem">Bu makale oluşturulamadı.</div>'; }
+    }));
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// SHOP
+// ════════════════════════════════════════════════════════════════
+const SHOP_ITEMS=[
+  {id:'freeze',icon:'🧊',name:'Seri Dondurma',desc:'Streak tehlikeye girdiğinde otomatik devreye girer.',cost:150,buy(){inventory.freezes++;}},
+  {id:'freeze3',icon:'❄️',name:'3x Seri Dondurma',desc:'Üç günlük seri koruması.',cost:400,buy(){inventory.freezes+=3;}},
+  {id:'reportcredit',icon:'📊',name:'Rapor Kredisi',desc:'Ücretsiz haftalık AI raporu.',cost:80,buy(){inventory.reportCredits++;}},
+  {id:'aiask5',icon:'🤖',name:'5x AI Soru Paketi',desc:'5 AI koç sorusu.',cost:20,buy(){inventory.aiAsks=(inventory.aiAsks||0)+5;}},
+  {id:'aiask1',icon:'💬',name:'Tek AI Sorusu',desc:'Tek seferlik AI koç sorusu.',cost:5,buy(){inventory.aiAsks=(inventory.aiAsks||0)+1;}},
+  {id:'doubleday',icon:'⚡',name:'2x Puan Günü',desc:'Bugün hem oturum hem görev puanları 2 katı.',cost:60,buy(){inventory.doubledays=(inventory.doubledays||0)+1;}},
+];
+function spendPts(amount){ const t=getTotalPts(); if(t<amount) return false; totalSpent+=amount; save(); return true; }
+function buyItem(id){
+  const item=SHOP_ITEMS.find(i=>i.id===id); if(!item) return;
+  if(!spendPts(item.cost)){toast('⚠️ Yeterli puan yok!');return;}
+  item.buy(); save(); renderShop(); renderTaskScore();
+  toast(`✅ ${item.icon} ${item.name} satın alındı!`);
+}
+function renderShop(){
+  const pts=getTotalPts(); $('shop-total-pts').textContent=pts;
+  const inv=$('shop-inventory'); const badges=[];
+  if((inventory.freezes||0)>0) badges.push(`<span class="inv-item freeze">🧊 ${inventory.freezes}</span>`);
+  if((inventory.reportCredits||0)>0) badges.push(`<span class="inv-item report">📊 ${inventory.reportCredits}</span>`);
+  if((inventory.aiAsks||0)>0) badges.push(`<span class="inv-item" style="background:rgba(184,123,255,.1);border:1px solid rgba(184,123,255,.3);color:var(--purple)">🤖 ${inventory.aiAsks}</span>`);
+  inv.innerHTML=badges.join('')||'<span style="font-size:.76rem;color:var(--muted2)">Envanter boş.</span>';
+  // 2x badge
+  const row=$('active-2x-row');
+  if((inventory.doubledays||0)>0){
+    row.style.display='block';
+    row.innerHTML=`<div class="active-2x-badge">⚡ 2x Puan Günü Aktif! · ${inventory.doubledays} kullanım kaldı</div>`;
+  } else row.style.display='none';
+  $('shop-grid').innerHTML=SHOP_ITEMS.map(item=>{
+    const ok=pts>=item.cost;
+    return `<div class="shop-item ${!ok?'locked':''}"><div class="shop-icon">${item.icon}</div><div class="shop-name">${item.name}</div><div class="shop-desc">${item.desc}</div><div class="shop-cost"><span class="shop-pts">🪙 ${item.cost}pt</span><button class="shop-buy-btn" onclick="buyItem('${item.id}')" ${!ok?'disabled':''}>${ok?'Satın Al':'Yetersiz'}</button></div></div>`;
+  }).join('');
+  const aiAsks=inventory.aiAsks||0;
+  $('ai-cost-tag').textContent=aiAsks>0?`🤖 ${aiAsks} hakkın var (ücretsiz)`:`🪙 5 puan / soru`;
+  $('ai-ask-btn').disabled=(aiAsks===0&&pts<5);
+}
+
+async function askAI(){
+  const q=$('ai-input').value.trim(); if(!q){$('ai-input').focus();return;}
+  const aiAsks=inventory.aiAsks||0; const pts=getTotalPts(); const cost=5;
+  if(aiAsks>0){ inventory.aiAsks--; save(); }
+  else if(pts>=cost){ if(!spendPts(cost)){toast('⚠️ Yeterli puan yok!');return;} }
+  else{toast('⚠️ Yeterli puan veya soru hakkı yok!');return;}
+  const msg=$('ai-msg'); msg.className='ai-msg loading'; msg.textContent='⏳ AI düşünüyor…'; $('ai-ask-btn').disabled=true; $('ai-input').value='';
+  const recentSess=sessions.slice(-15).map(s=>s.date+': '+s.actName+' ('+fmtHm(s.minutes)+')').join('\n');
+  const recentCI=checkins.slice(-8).map(ci=>{
+    const a=(ci.answers||[]).filter(a=>a.a&&a.a!=='—').slice(0,4).map(a=>a.q+'→'+a.a).join('; ');
+    return '['+ci.date+' '+ci.actName+'] '+a;
+  }).join('\n');
+  const todayPts=taskScores[today()]||0;
+  const streak=calcStreak();
+  const lv=getLevel(getTotalSessScore());
+  const weeklyPts=getTotalSessScore();
+  const topAct=(() => {
+    const m={}; sessions.forEach(s=>{if(!m[s.actName])m[s.actName]=0;m[s.actName]+=s.minutes;});
+    return Object.entries(m).sort((a,b)=>b[1]-a[1])[0]?.[0]||'yok';
+  })();
+  const tasksDoneToday=tasks.filter(t=>t.doneDate===today()).length;
+  const prompt=`Sen deneyimli bir kişisel gelişim ve üretkenlik koçusun. Kullanıcının verilerini analiz ederek kişiselleştirilmiş, samimi Türkçe yanıt ver.
+
+## KULLANICI PROFİLİ
+Seviye: ${lv.label} | Toplam oturum puanı: ${weeklyPts}
+Güncel seri: ${streak} gün 🔥
+Bugünkü görev puanı: ${todayPts} | Bugün tamamlanan görev: ${tasksDoneToday}
+En çok yapılan etkinlik: ${topAct}
+Aktif etkinlikler: ${activities.map(a=>a.title+'('+fmtHm(a.dur)+'/gün)').join(', ')||'yok'}
+Haftalık hedefler: ${JSON.stringify(weeklyGoals)||'belirtilmemiş'}
+
+## SON 15 OTURUM
+${recentSess||'(kayıt yok)'}
+
+## SON 8 GÜNLÜK NOT ÖZETİ  
+${recentCI||'(not yok)'}
+
+## KULLANICININ SORUSU
+${q}
+
+## YANIT KURALLARI
+- Türkçe yaz, samimi ve motive edici ol
+- Kullanıcının gerçek verilerine spesifik atıf yap (tarihler, etkinlik adları, notlar)
+- Soyut tavsiye verme — somut, uygulanabilir adımlar öner
+- Eğer soru kişisel gelişimle ilgiliyse: güçlü yönleri say, gelişim alanı belirt, bu hafta için 2-3 somut adım öner
+- Eğer soru motivasyonla ilgiliyse: verilerden başarıları öne çıkar, momentum oluştur
+- Eğer soru planlama/önceliklendirme içeriyorsa: haftalık hedefler ve mevcut streak'i göz önüne al
+- 3-5 paragraf, başlık kullanma, doğrudan "sen" diye hitap et
+- Cevabın sonunda küçük bir meydan okuma/hedef bırak`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:700,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json(); if(data.error) throw new Error(data.error.message);
+    msg.className='ai-msg'; msg.textContent=data.content?.find(b=>b.type==='text')?.text||'Yanıt alınamadı.';
+  }catch(e){ console.warn('askAI:',e.message); msg.className='ai-msg'; msg.textContent='❌ Bağlantı hatası. Tekrar dene.'; if(aiAsks>0)inventory.aiAsks++;else totalSpent-=cost; save(); }
+  $('ai-ask-btn').disabled=false; renderShop();
+}
+
+// ════════════════════════════════════════════════════════════════
+// BACKUP
+// ════════════════════════════════════════════════════════════════
+function exportData(){
+  const data={activities,sessions,checkins,tasks,taskScores,inventory,totalSpent,sessScores,weeklyGoals,settings,levelQuestions,exportDate:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='program-yedek-'+today()+'.json'; a.click();
+  URL.revokeObjectURL(url); toast('✅ Veriler indirildi!');
+}
+function importData(input){
+  const file=input.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.activities) activities=d.activities;
+      if(d.sessions) sessions=d.sessions;
+      if(d.checkins) checkins=d.checkins;
+      if(d.tasks) tasks=d.tasks;
+      if(d.taskScores) taskScores=d.taskScores;
+      if(d.inventory) inventory=d.inventory;
+      if(d.totalSpent) totalSpent=d.totalSpent;
+      if(d.sessScores) sessScores=d.sessScores;
+      if(d.weeklyGoals) weeklyGoals=d.weeklyGoals;
+      if(d.levelQuestions) levelQuestions=d.levelQuestions;
+      if(d.settings) settings=d.settings;
+      if(d.totalSpent!==undefined) totalSpent=d.totalSpent;
+      save(); saveSessScores();
+      renderTimeline(); renderTasks(); renderTaskScore();
+      toast('✅ Veriler içe aktarıldı!'); closeModal('modal-settings');
+    }catch(x){ toast('❌ Geçersiz yedek dosyası.'); }
+  };
+  r.readAsText(file);
+}
+function checkMonthlyBackup(){
+  const last=localStorage.getItem('p5-last-backup');
+  const now=today();
+  if(!last||now.slice(0,7)!==last.slice(0,7)){
+    // New month — remind
+    if(sessions.length>10){
+      setTimeout(()=>toast('💾 Aylık yedekleme zamanı! Ayarlar > Veri Yedekleme',5000),3000);
+    }
+    localStorage.setItem('p5-last-backup',now);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// DAILY RESET
+// ════════════════════════════════════════════════════════════════
+function checkDailyReset(){
+  const last=localStorage.getItem('p5-last-reset'); const t=today();
+  if(last!==t){
+    tasks.forEach(task=>{ if(!task.recur){ task.done=false; task.doneDate=null; } });
+    localStorage.setItem('p5-last-reset',t); save();
+  }
+}
+function cleanOldData(){
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-90);
+  const cutStr=cutoff.getFullYear()+'-'+String(cutoff.getMonth()+1).padStart(2,'0')+'-'+String(cutoff.getDate()).padStart(2,'0');
+  sessions=sessions.filter(s=>s.date>=cutStr);
+  checkins=checkins.filter(c=>c.date>=cutStr);
+  Object.keys(sessScores).forEach(id=>{ if(sessScores[id].date&&sessScores[id].date<cutStr) delete sessScores[id]; });
+  save(); saveSessScores();
+}
+function scheduleMidnightReset(){
+  const now=new Date(); const mn=new Date(now); mn.setHours(24,0,5,0);
+  setTimeout(()=>{ checkDailyReset(); processRecurringTasks(); renderTasks(); renderTaskScore(); renderStreak(); scheduleMidnightReset(); }, mn-now);
+}
+
+// ════════════════════════════════════════════════════════════════
+// MODAL / TOAST
+// ════════════════════════════════════════════════════════════════
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+let toastT;
+function toast(msg,dur=2500){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),dur); }
+
+// ════════════════════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ════════════════════════════════════════════════════════════════
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  const bnav=$('bnav-'+name); if(bnav) bnav.classList.add('active');
+  if(name==='timer'){ renderActPickList(); updateDisplay(); }
+  if(name==='analiz'){
+    // Reset section visibility based on current tab
+    ['stats','log','report'].forEach(t=>{
+      const el=$('analiz-'+t);
+      if(el) el.style.display=(t===curAnalizTab?'block':'none');
+    });
+    document.querySelectorAll('.analiz-tab').forEach(b=>{
+      b.classList.toggle('active', b.textContent.includes(
+        curAnalizTab==='stats'?'İstatistik':curAnalizTab==='log'?'Günlük':'Rapor'
+      ));
+    });
+    if(curAnalizTab==='stats') renderStats();
+    else if(curAnalizTab==='log') renderLog();
+  }
+  if(name==='tasks'){ renderTasks(); renderTaskScore(); }
+  if(name==='magaza') renderShop();
+}
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+function init(){
+  if(!activities.length){
+    activities=[
+      {id:1,title:'Piyano çal',   notifTime:'09:00',dur:60, color:'#e8c547'},
+      {id:2,title:'Kitap oku',    notifTime:'10:30',dur:60, color:'#5c9eff'},
+      {id:3,title:'Felsefe çalış',notifTime:'14:00',dur:90, color:'#ff6b6b'},
+      {id:4,title:'Yürüyüş',      notifTime:'07:30',dur:30, color:'#52d9a0'},
+    ];
+    activities.sort((a,b)=>(a.notifTime||'').localeCompare(b.notifTime||''));
+    save();
+  }
+  // Logo
+  const now=new Date();
+  const D=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],M=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  $('logo').textContent=`◈ ${D[now.getDay()]} ${now.getDate()} ${M[now.getMonth()]}`;
+  // Color palette init
+  buildPalette('color-palette','#e8c547',selectMainColor);
+  // Init
+  initSettings(); updateConnBadge(); checkNotifPerm(); scheduleAll();
+  checkDailyReset(); cleanOldData(); checkMonthlyBackup();
+  processRecurringTasks(); renderTimeline(); renderTasks(); renderTaskScore(); scheduleTaskNotifs();
+  restoreTimerState(); updateDisplay(); scheduleMidnightReset();
+  // Goals modal trigger
+  document.querySelector('[onclick="openModal(\'modal-goals\')"]')?.addEventListener('click',openGoalsModal);
+  // Event listeners
+  $('inp-title').addEventListener('keydown',e=>{ if(e.key==='Enter') addActivity(); });
+  $('task-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') addTask(); });
+  $('task-inp').addEventListener('input',()=>{
+    const v=$('task-inp').value.trim();
+    if(v.length<4){$('task-diff-preview').style.display='none';pendingDiff=null;pendingPts=null;return;}
+    clearTimeout(diffDebounce); diffDebounce=setTimeout(()=>detectDifficulty(v),700);
+  });
+  $('ai-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askAI();} });
+  // Notification click → open timer
+  navigator.serviceWorker?.ready.then(sw=>{
+    navigator.serviceWorker.addEventListener('message',e=>{ if(e.data?.page==='timer') showPage('timer',document.getElementById('bnav-timer')); });
+  });
+}
+
+init();
+
+// ── PWA SERVICE WORKER ──────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(r=>console.log('✅ SW:',r.scope))
+      .catch(e=>{}); // suppress 404 errors silently
+  });
+}
+</script>
+</body>
+</html>
