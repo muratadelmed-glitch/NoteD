@@ -1,0 +1,19 @@
+{
+  "name": "Günlük Program",
+  "short_name": "Program",
+  "description": "Kişisel günlük program ve gelişim takibi",
+  "start_url": "/G-nl-k-program/",
+  "scope": "/G-nl-k-program/",
+  "display": "standalone",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2308090c'/><text y='75' x='15' font-size='70' fill='%23e8c547'>◈</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
