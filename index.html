@@ -1191,10 +1191,10 @@ function extractJSON(text){
 }
 
 async function callDiffAPI(taskTitle){
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",headers:{"Content-Type":"application/json"},
+  const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+    method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer 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"},
     body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",max_tokens:200,
+      model:"llama-3.3-70b-versatile",max_tokens:200,
       messages:[{role:"user",content:`Sen bir kişisel gelişim asistanısın. Aşağıdaki görevi 1-20 puan arasında puanla. SADECE JSON döndür.
 
 ━━ PUANLAMA REHBERİ ━━
@@ -1218,8 +1218,8 @@ SADECE bu JSON formatını döndür (başka hiçbir şey yazma):
   });
   if(!res.ok){ const e=await res.text(); throw new Error('API '+res.status+': '+e); }
   const data=await res.json();
-  if(data.error) throw new Error(data.error.message);
-  const raw=data.content?.find(b=>b.type==='text')?.text||'';
+  if(data.error) throw new Error(data.error?.message||'API hatası');
+  const raw=data.choices?.[0]?.message?.content||'';
   const parsed=extractJSON(raw);
   if(!parsed||typeof parsed.pts!=='number'||parsed.pts<1||parsed.pts>20) throw new Error('Geçersiz: '+raw);
   return parsed;
@@ -2616,9 +2616,9 @@ YAZIM KURALLARI:
 - ~700-900 kelime
 - Türkçe dil bilgisine dikkat et`;
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer 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"},body:JSON.stringify({model:"llama-3.3-70b-versatile",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
-    const html=data.content?.find(b=>b.type==='text')?.text||'Rapor oluşturulamadı.';
+    const html=data.choices?.[0]?.message?.content||'Rapor oluşturulamadı.';
     $('report-output').innerHTML=`<div class="report-meta">📅 ${wStartStr} – ${wEndStr} &nbsp;·&nbsp; ${fmtHmLong(totalMin)} &nbsp;·&nbsp; ${weekSessions.length} oturum &nbsp;·&nbsp; ${weekTaskPts}pt görev</div><div class="report-body">${html}</div>`;
     await generateArticles(weekCheckins);
   }catch(e){ $('report-output').innerHTML=`<div style="color:var(--red);font-size:.83rem">Rapor oluşturulamadı. İnternet bağlantını kontrol et.</div>`; }
@@ -2636,7 +2636,7 @@ async function generateArticles(weekCheckins){
       const i=essays.indexOf(essay);
       const prompt=`Kullanıcı şunu yazdı:\nEtkinlik: ${essay.actName}\nTarih: ${essay.date}\nSoru: ${essay.question}\nYanıt: ${essay.answer}\n\nBu yanıtı zenginleştir. ## başlıklı, 2-3 paragraf Türkçe mini makale yaz. Filozoftan/kavramdan bahsediliyorsa ek bağlam ekle. ~150-200 kelime. Sadece içerik.`;
       try{
-        const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:prompt}]})});
+        const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer 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"},body:JSON.stringify({model:"llama-3.3-70b-versatile",max_tokens:400,messages:[{role:"user",content:prompt}]})});
         const d=await r.json();
         const text=d.content?.find(b=>b.type==='text')?.text||'';
         const lines=text.split('\n');
@@ -2738,9 +2738,9 @@ ${q}
 - 3-5 paragraf, başlık kullanma, doğrudan "sen" diye hitap et
 - Cevabın sonunda küçük bir meydan okuma/hedef bırak`;
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:700,messages:[{role:"user",content:prompt}]})});
-    const data=await res.json(); if(data.error) throw new Error(data.error.message);
-    msg.className='ai-msg'; msg.textContent=data.content?.find(b=>b.type==='text')?.text||'Yanıt alınamadı.';
+    const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer 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"},body:JSON.stringify({model:"llama-3.3-70b-versatile",max_tokens:700,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json(); if(data.error) throw new Error(data.error?.message||'API hatası');
+    msg.className='ai-msg'; msg.textContent=data.choices?.[0]?.message?.content||'Yanıt alınamadı.';
   }catch(e){ console.warn('askAI:',e.message); msg.className='ai-msg'; msg.textContent='❌ Bağlantı hatası. Tekrar dene.'; if(aiAsks>0)inventory.aiAsks++;else totalSpent-=cost; save(); }
   $('ai-ask-btn').disabled=false; renderShop();
 }

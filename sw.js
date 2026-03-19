@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // AI API ve fontlar — her zaman internetten al
-  if (url.hostname === 'api.anthropic.com' ||
+  if (url.hostname === 'api.anthropic.com' || url.hostname === 'api.groq.com' ||
       url.hostname === 'fonts.googleapis.com' ||
       url.hostname === 'fonts.gstatic.com') {
     event.respondWith(fetch(event.request).catch(() => new Response('', {status: 503})));
